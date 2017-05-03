@@ -2,6 +2,7 @@ package pl.edu.pw.elka.studia.wedt.service;
 
 import org.javatuples.Pair;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -10,5 +11,8 @@ import java.util.List;
 public interface WikiService {
     List<Pair<String,String>> getLanguages();
 
-    List<String> getEntries(String language, String search);
+    BigInteger getTotalArticlesNumber(String language);
+    List<String> getForbiddenArticleTitles(String language);
+    List<String> getReferencesOfArticle(String language, String search);
+    List<String> getReferencesToArticle(String language, String search);
 }
