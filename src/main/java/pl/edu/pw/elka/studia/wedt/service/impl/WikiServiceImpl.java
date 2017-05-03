@@ -3,7 +3,9 @@ package pl.edu.pw.elka.studia.wedt.service.impl;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestOperations;
@@ -12,6 +14,7 @@ import pl.edu.pw.elka.studia.wedt.service.impl.api.ArticleTitle;
 import pl.edu.pw.elka.studia.wedt.service.impl.api.ContinueToken;
 import pl.edu.pw.elka.studia.wedt.service.impl.api.WikiResponse;
 
+import javax.annotation.PostConstruct;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -23,7 +26,6 @@ import java.util.Map;
  * Created by Komatta on 2017-05-03.
  */
 @Service
-@Lazy
 public class WikiServiceImpl implements WikiService {
     private static final Logger LOGGER = Logger.getLogger(WikiServiceImpl.class);
     private static final String API_URL_ARTICLE_LINKS = "https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json&titles={1}&plcontinue={2}";
@@ -35,19 +37,30 @@ public class WikiServiceImpl implements WikiService {
     private static Map<String, List<String>> AMBIGUOUS_PAGES_MAP = new HashMap<>(2);
 
     @Autowired
-    public WikiServiceImpl(RestOperations restOperations) {
-        this.restOperations = restOperations;
+    private RestOperations restOperations;
 
+    @Autowired
+    private Environment environment;
+
+    @Value("${wiki.api.use.disambiguation:true}")
+    private Boolean disambiguationEnabled;
+
+    @PostConstruct
+    public void init() {
         for(Pair<String,String> langs : getLanguages()) {
             if(AMBIGUOUS_PAGES_MAP.get(langs.getValue0()) == null) {
-                LOGGER.info("Initializing ambiguous pages list for lang:"+langs.getValue0());
-                AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), collectAll(API_URL_AMBIGUOUS_PAGES, langs.getValue0(), ""));
-                LOGGER.info("Ambiguous pages list initialized for lang:"+langs.getValue0());
+                if(disambiguationEnabled) {
+                    LOGGER.info("Initializing ambiguous pages list for lang:" + langs.getValue0());
+                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), collectAll(API_URL_AMBIGUOUS_PAGES, langs.getValue0(), ""));
+                    LOGGER.info("Ambiguous pages list initialized for lang:" + langs.getValue0());
+                }else{
+                    LOGGER.info("Ambiguous pages list for lang:" + langs.getValue0()+" disabled");
+                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), new ArrayList<String>());
+                }
             }
         }
     }
 
-    private RestOperations restOperations;
 
     private List<String> collectAll(String urlTemplate, String language, String search){
         List<String> result = new ArrayList<>();

@@ -21,6 +21,7 @@
             </list>
         </property>
     </bean>
+    <bean class="org.springframework.web.client.RestTemplate" />
 
 
     <!--bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
