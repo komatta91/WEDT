@@ -3,6 +3,7 @@ package pl.edu.pw.elka.studia.wedt.controller.request;
 /**
  * Created by Komatta on 2017-05-03.
  */
+
 public class CalculateRequest {
     private String language;
     private String firstEntry;

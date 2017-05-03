@@ -68,7 +68,7 @@ function init() {
 
 function getRequestData() {
     var data = {};
-    if ($("#language").val().length == 1) {
+    if ($("#language").val() && $("#language").val().length == 1) {
         data["language"] = $("#language").val()[0];
     }
     if ($("#firstEntry").val() && $("#firstEntry").val().length == 1) {
