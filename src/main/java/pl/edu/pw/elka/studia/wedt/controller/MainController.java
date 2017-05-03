@@ -44,14 +44,14 @@ public class MainController {
 
     @RequestMapping(value = "/EntryList", method = RequestMethod.POST)
     public @ResponseBody
-    List<String> getPostalCodeList(@RequestBody EntryRequest request) {
+    List<String> getEntryList(@RequestBody EntryRequest request) {
         return wikiService.getReferencesOfArticle(request.getLanguage(), request.getSearch());
 
     }
 
     @RequestMapping(value = "/Calculate", method = RequestMethod.POST)
     public @ResponseBody
-    BigDecimal getPostalCodeList(@RequestBody CalculateRequest request) {
+    BigDecimal calculate(@RequestBody CalculateRequest request) {
         return calcService.calculate(request.getLanguage(), request.getFirstEntry(), request.getSecondEntry());
 
     }
