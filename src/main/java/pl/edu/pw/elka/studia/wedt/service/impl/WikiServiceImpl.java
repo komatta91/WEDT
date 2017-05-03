@@ -17,8 +17,8 @@ public class WikiServiceImpl implements WikiService {
     @Override
     public List<Pair<String,String>> getLanguages() {
         List<Pair<String,String>> result = new ArrayList<>();
-        result.add(new Pair<String, String>("pl", "Polski"));
-        result.add(new Pair<String, String>("en", "English"));
+        result.add(new Pair<>("pl", "Polski"));
+        result.add(new Pair<>("en", "English"));
         return result;
     }
 
