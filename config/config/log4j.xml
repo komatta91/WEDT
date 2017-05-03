@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration degug="false">
+    <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %p %c{1} [%t] %X %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="RollingFile" class="org.apache.log4j.RollingFileAppender">
+        <param name="file" value="${java.io.confdir}/logs/wedt.log" />
+        <param name="encoding" value="UTF-8" />
+        <param name="append" value="true" />
+        <param name="MaxFileSize" value="100MB"/>
+        <param name="MaxBackupIndex" value="5"/>
+        <rollingPolicy class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <param name="FileNamePattern" value="${java.io.confdir}/logs/$${date:yyyy-MM}/wedt-%d{MM-dd-yyyy}-%i.log.gz" />
+        </rollingPolicy>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %p %c [%t] %X %m%n" />
+        </layout>
+    </appender>
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="RollingFile" />
+        <appender-ref ref="STDOUT" />
+    </root>
+
+
+</log4j:configuration>

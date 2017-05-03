@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="pl" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+
+    <title th:text="#{menu.title}"></title>
+
+    <div th:replace="fragment/css"></div>
+</head>
+<body>
+
+<div class="container container-main">
+    <div class="panel panel-default">
+        <div class="panel-heading-custom panel-heading">
+            <span class="nag" th:text="#{menu.title}"></span>
+        </div>
+        <div class="panel-body-custom panel-body">
+            <div id="options-div" class="container-fluid">
+                <div class="row justify-content-md-center extra-bottom-padding">
+                    <label class="col-sm-1 control-label">Language</label>
+                    <div class="col-sm-2">
+                        <select class="selectpicker form-control" id="language" data-live-search="true" multiple
+                                data-max-options="1">
+                            <div th:each="item : ${languages}">
+                                <option th:value="${item.value0}" th:text="${item.value1}"></option>
+                            </div>
+                        </select>
+                    </div>
+                    <label class="col-sm-1 control-label">First Entry</label>
+                    <div class="col-sm-3">
+                        <select class="selectpicker form-control" id="firstEntry" data-live-search="true" multiple
+                                disabled data-max-options="1">
+                        </select>
+                    </div>
+                    <label class="col-sm-1 control-label">Second Entry</label>
+                    <div class="col-sm-3">
+                        <select class="selectpicker form-control" id="secondEntry" data-live-search="true" multiple
+                                disabled data-max-options="1">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-md-center extra-bottom-padding">
+                <div class="col-sm-12">
+                    <div class="btn-group btn-group-md pull-right">
+                        <button id="calculate" class="btn btn-gray" onclick="calculate()">Calculate
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-md-center extra-bottom-padding">
+                <div class="col-sm-12">
+                    <span id="calculatedResult" hide></span>
+                </div>
+            </div>
+        </div>
+        <div class="panel-footer-custom panel-footer">
+            <div th:replace="fragment/footer"></div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragment/js"></div>
+<script>
+    $( document ).ready(function() {
+        init();
+    });
+
+</script>
+
+</body>
+</html>
