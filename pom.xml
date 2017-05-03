@@ -18,6 +18,8 @@
 		<log4j.version>1.2.17</log4j.version>
 		<postgresql.version>9.1-901.jdbc4</postgresql.version>
 		<guava.version>19.0</guava.version>
+        <javatuples.version>1.2</javatuples.version>
+<logback.version>1.0.0</logback.version>
     </properties>
 
     <dependencies>
@@ -39,11 +41,6 @@
             <version>${spring.version}</version>
         </dependency>
 
-        <!--dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>com.springsource.javax.servlet</artifactId>
-            <version>${servlet.version}</version>
-        </dependency-->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -80,10 +77,11 @@
             <version>${log4j.version}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/log4j/apache-log4j-extras -->
         <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
+            <groupId>log4j</groupId>
+            <artifactId>apache-log4j-extras</artifactId>
+            <version>${log4j.version}</version>
         </dependency>
 
         <dependency>
@@ -96,7 +94,12 @@
         <dependency>
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
-            <version>1.2</version>
+            <version>${javatuples.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
         </dependency>
 
     </dependencies>
