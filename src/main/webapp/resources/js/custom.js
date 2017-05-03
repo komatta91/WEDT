@@ -33,6 +33,8 @@ function init() {
     $('#language').on('change', function(){
         $("#calculatedResult").html('');
         var language = $('#language option:selected').val();
+        $("#firstEntry").selectpicker('deselectAll');
+        $("#secondEntry").selectpicker('deselectAll');
         if (language) {
             $("#firstEntry")
                 .html('')
@@ -77,9 +79,6 @@ function getRequestData() {
     if ($("#secondEntry").val() && $("#secondEntry").val().length == 1) {
         data["language"] = $("#secondEntry").val()[0];
     }
-    console.log(data);
-    console.log(JSON.stringify( data ));
-
     return JSON.stringify( data );
 };
 

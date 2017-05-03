@@ -1,5 +1,6 @@
 package pl.edu.pw.elka.studia.wedt.service.impl;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import pl.edu.pw.elka.studia.wedt.service.CalculatorService;
