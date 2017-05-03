@@ -45,7 +45,7 @@ public class MainController {
     @RequestMapping(value = "/EntryList", method = RequestMethod.POST)
     public @ResponseBody
     List<String> getEntryList(@RequestBody EntryRequest request) {
-        return wikiService.getReferencesOfArticle(request.getLanguage(), request.getSearch());
+        return wikiService.getEntries(request.getLanguage(), request.getSearch());
 
     }
 
