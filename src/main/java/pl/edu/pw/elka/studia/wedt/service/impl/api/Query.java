@@ -39,6 +39,11 @@ public class Query {
         this.search = search;
     }
 
+    @JsonProperty("backlinks")
+    public void setBacklinks(List<ArticleTitle> search) {
+        this.search = search;
+    }
+
     @JsonProperty("categorymembers")
     public void setCategoryMembers(List<ArticleTitle> search) {
         this.search = search;

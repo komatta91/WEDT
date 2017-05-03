@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -28,9 +27,9 @@ import java.util.Map;
 @Service
 public class WikiServiceImpl implements WikiService {
     private static final Logger LOGGER = Logger.getLogger(WikiServiceImpl.class);
-    private static final String API_URL_ARTICLE_LINKS = "https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json&titles={1}&plcontinue={2}";
-    private static final String API_URL_ARTICLE_BACKLINKS = "https://{0}.wikipedia.org/w/api.php?action=query&list=backlinks&bllimit=max&blnamespace=0&format=json&bltitle={1}&blcontinue={2}";
-    private static final String API_URL_AMBIGUOUS_PAGES = "https://{0}.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&cmnamespace=0&cmtype=page&format=json&cmtitle=Category:All_disambiguation_pages&cmcontinue={2}";
+    private static final String API_URL_ARTICLE_LINKS = "https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json&titles={1}{2}";
+    private static final String API_URL_ARTICLE_BACKLINKS = "https://{0}.wikipedia.org/w/api.php?action=query&list=backlinks&bllimit=max&blnamespace=0&format=json&bltitle={1}{2}";
+    private static final String API_URL_AMBIGUOUS_PAGES = "https://{0}.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&cmnamespace=0&cmtype=page&format=json&cmtitle=Category:All_disambiguation_pages{2}";
     private static final String API_URL_SEARCH = "https://{0}.wikipedia.org/w/api.php?action=query&list=search&srprop=titlesnippet&srlimit=100&format=json&srsearch={1}";
     private static final String API_URL_STATISTICS = "https://{0}.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=statistics&format=json";
 
@@ -64,15 +63,14 @@ public class WikiServiceImpl implements WikiService {
 
     private List<String> collectAll(String urlTemplate, String language, String search){
         List<String> result = new ArrayList<>();
-        String continueToken = "||";
+        String continueToken = "";
         try {
             while (continueToken != null) {
-                    String url = MessageFormat.format(urlTemplate, language, search, continueToken);
+                String url = MessageFormat.format(urlTemplate, language, search, continueToken);
                 WikiResponse wikiResponse = restOperations.getForObject(url, WikiResponse.class);
-                LOGGER.debug(MessageFormat.format("Response for URL {0} is {1}", url, wikiResponse));
                 ContinueToken token = wikiResponse.getContinueToken();
                 if (token != null) {
-                    continueToken = token.getContinueToken();
+                    continueToken = MessageFormat.format("&{0}={1}", token.getParameterName(), token.getContinueToken());
                 } else {
                     continueToken = null;
                 }
@@ -86,6 +84,8 @@ public class WikiServiceImpl implements WikiService {
                     result.add(articleTitle.getTitle());
                 }
             }
+            List<String> ambiguousArticlesList = getForbiddenArticleTitles(language);
+            result.removeAll(ambiguousArticlesList);
         } catch (Exception e) {
             LOGGER.error("Exception occurred for url " + urlTemplate + " and search: " + search, e);
         }
@@ -122,7 +122,6 @@ public class WikiServiceImpl implements WikiService {
         }
         List<String> entries = collectAll(API_URL_SEARCH, language, search);
         List<String> forbidden = getForbiddenArticleTitles(language);
-        LOGGER.info(forbidden);
         entries.removeAll(forbidden);
         return entries;
     }

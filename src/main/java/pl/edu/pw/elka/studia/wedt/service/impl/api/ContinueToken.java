@@ -1,5 +1,6 @@
 package pl.edu.pw.elka.studia.wedt.service.impl.api;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,21 +9,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ContinueToken {
+    private String parameterName;
     private String continueToken;
 
-    @JsonProperty("plcontinue")
-    public void setContinueTokenPl(String continueToken) {
+    @JsonAnySetter
+    public void setContinueTokenPl(String parameterName, String continueToken) {
+        this.parameterName = parameterName;
         this.continueToken = continueToken;
     }
 
-    @JsonProperty("blcontinue")
-    public void setContinueTokenBl(String continueToken) {
-        this.continueToken = continueToken;
-    }
+    @JsonProperty("continue")
+    public void setContinueTokenBl(String continueToken) { }
 
-    @JsonProperty("cmcontinue")
-    public void setContinueTokenCm(String continueToken) {
-        this.continueToken = continueToken;
+    public String getParameterName() {
+        return parameterName;
     }
 
     public String getContinueToken() {

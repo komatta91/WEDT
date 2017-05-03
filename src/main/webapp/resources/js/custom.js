@@ -74,10 +74,10 @@ function getRequestData() {
         data["language"] = $("#language").val()[0];
     }
     if ($("#firstEntry").val() && $("#firstEntry").val().length == 1) {
-        data["language"] = $("#firstEntry").val()[0];
+        data["firstEntry"] = $("#firstEntry").val()[0];
     }
     if ($("#secondEntry").val() && $("#secondEntry").val().length == 1) {
-        data["language"] = $("#secondEntry").val()[0];
+        data["secondEntry"] = $("#secondEntry").val()[0];
     }
     return JSON.stringify( data );
 };
