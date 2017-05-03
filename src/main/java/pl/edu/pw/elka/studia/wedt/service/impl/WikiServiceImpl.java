@@ -28,6 +28,7 @@ public class WikiServiceImpl implements WikiService {
         result.add("Ala");
         result.add("kot");
         result.add("pies");
+        result.add("Grzyb");
         return result;
     }
 }
