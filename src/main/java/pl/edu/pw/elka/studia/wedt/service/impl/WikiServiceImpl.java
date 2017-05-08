@@ -1,5 +1,7 @@
 package pl.edu.pw.elka.studia.wedt.service.impl;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Komatta on 2017-05-03.
@@ -45,6 +48,11 @@ public class WikiServiceImpl implements WikiService {
             return template;
         }
     }
+
+    private static Cache<Pair<String, String>, Integer> BACKLINK_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(1000000000L)
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build();
 
     private static Map<String, List<String>> AMBIGUOUS_PAGES_MAP = new HashMap<>(2);
 
@@ -162,6 +170,17 @@ public class WikiServiceImpl implements WikiService {
             return new ArrayList<>();
         }
         return collectAll(ApiTemplate.API_URL_ARTICLE_BACKLINKS, language, search, false);
+    }
+
+    @Override
+    public Integer getReferencesToArticleAmount(String language, String search) {
+        Pair<String, String> key = new Pair<>(language, search);
+        Integer result = BACKLINK_CACHE.getIfPresent(key);
+        if(result == null){
+            result = getReferencesToArticle(language, search).size();
+            BACKLINK_CACHE.put(key, result);
+        }
+        return result;
     }
 
 }
