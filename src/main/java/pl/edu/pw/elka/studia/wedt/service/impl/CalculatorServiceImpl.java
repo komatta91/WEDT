@@ -1,6 +1,7 @@
 package pl.edu.pw.elka.studia.wedt.service.impl;
 
 import org.apache.log4j.Logger;
+import org.javatuples.Pair;
 import org.javatuples.Tuple;
 import org.la4j.vector.dense.BasicVector;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import pl.edu.pw.elka.studia.wedt.service.WikiService;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Created by Komatta on 2017-05-03.
@@ -61,17 +63,35 @@ public class CalculatorServiceImpl implements CalculatorService {
         return result;
     }
 
-    private Map<String, BigDecimal> calculateWeights(String language,  BigInteger wikiArticlesAmount, Set<String> distinctLinks, List<String> existingList) {
+    private Map<String, BigDecimal> calculateWeights(final String language,  BigInteger wikiArticlesAmount, Set<String> distinctLinks, List<String> existingList) {
         Map<String, BigDecimal> result = new HashMap<>(distinctLinks.size());
+        ExecutorService executor = Executors.newFixedThreadPool(25);
+        List<Future<Pair<String, Integer>>> results = new ArrayList<>();
 
-        for (String link: distinctLinks) {
+        for (final String link: distinctLinks) {
             if (!existingList.contains(link)) {
                 result.put(link, new BigDecimal(0));
             } else {
-                int backLinkCount = wikiService.getReferencesToArticleAmount(language, link);
-                result.put(link, new BigDecimal(Math.log(new BigDecimal(wikiArticlesAmount.toString()).divide(new BigDecimal(backLinkCount), BigDecimal.ROUND_HALF_EVEN).doubleValue())));
+                results.add(executor.submit(new Callable<Pair<String, Integer>>() {
+                    @Override
+                    public Pair<String, Integer> call() throws Exception {
+                        return new Pair<>(link, wikiService.getReferencesToArticleAmount(language, link));
+                    }
+                }));
+                //int backLinkCount = wikiService.getReferencesToArticleAmount(language, link);
+                //result.put(link, new BigDecimal(Math.log(new BigDecimal(wikiArticlesAmount.toString()).divide(new BigDecimal(backLinkCount), BigDecimal.ROUND_HALF_EVEN).doubleValue())));
             }
         }
+        for (Future<Pair<String, Integer>> future: results) {
+            try {
+                Pair<String, Integer> pair = future.get();
+                result.put(pair.getValue0(), new BigDecimal(pair.getValue1()));
+            } catch (Exception e) {
+                LOGGER.error(e);
+            }
+
+        }
+
         return result;
     }
 
@@ -87,8 +107,13 @@ public class CalculatorServiceImpl implements CalculatorService {
         BigDecimal innerProduct = new BigDecimal(v1.innerProduct( v2 ));
         BigDecimal v1Norm = new BigDecimal(v1.norm());
         BigDecimal v2Norm = new BigDecimal(v2.norm());
-        BigDecimal radAngle = innerProduct.divide(v1Norm.multiply(v2Norm), BigDecimal.ROUND_HALF_EVEN);
-        return new BigDecimal(Math.acos(radAngle.divide(new BigDecimal(Math.PI), BigDecimal.ROUND_HALF_EVEN).doubleValue()));
+        BigDecimal radAngle = new BigDecimal(Math.acos(innerProduct.divide(v1Norm.multiply(v2Norm), BigDecimal.ROUND_HALF_EVEN).doubleValue()));
+
+        LOGGER.error(innerProduct);
+        LOGGER.error(v1Norm);
+        LOGGER.error(v2Norm);
+        LOGGER.error(radAngle);
+        return radAngle.divide(new BigDecimal(Math.PI), BigDecimal.ROUND_HALF_EVEN);
     }
 
 
