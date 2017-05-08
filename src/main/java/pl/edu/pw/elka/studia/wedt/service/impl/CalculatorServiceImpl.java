@@ -27,6 +27,8 @@ import java.util.concurrent.*;
 public class CalculatorServiceImpl implements CalculatorService {
     private Logger LOGGER = Logger.getLogger(CalculatorServiceImpl.class);
 
+    private int SCALE = 20;
+
     @Autowired
     private WikiService wikiService;
 
@@ -42,7 +44,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         commonList.retainAll(secondList);//This list might be worth presenting to the end-user
         double numerator = Math.log(Math.max(1, Math.max(firstList.size(), secondList.size()))) - Math.log(Math.max(1, commonList.size()));
         double denominator = Math.log(wikiArticlesAmount.doubleValue()) - Math.log(Math.max(1, Math.min(firstList.size(), secondList.size())));
-        BigDecimal result = new BigDecimal(numerator).divide(new BigDecimal(denominator), BigDecimal.ROUND_HALF_EVEN);
+        BigDecimal result = new BigDecimal(numerator).divide(new BigDecimal(denominator),SCALE, BigDecimal.ROUND_HALF_EVEN);
         stopWatch.stop();
         LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": running time (millis) = " +  stopWatch.getLastTaskInfo().getTimeMillis());
         return result;
@@ -78,8 +80,6 @@ public class CalculatorServiceImpl implements CalculatorService {
                         return new Pair<>(link, wikiService.getReferencesToArticleAmount(language, link));
                     }
                 }));
-                //int backLinkCount = wikiService.getReferencesToArticleAmount(language, link);
-                //result.put(link, new BigDecimal(Math.log(new BigDecimal(wikiArticlesAmount.toString()).divide(new BigDecimal(backLinkCount), BigDecimal.ROUND_HALF_EVEN).doubleValue())));
             }
         }
         for (Future<Pair<String, Integer>> future: results) {
@@ -107,13 +107,15 @@ public class CalculatorServiceImpl implements CalculatorService {
         BigDecimal innerProduct = new BigDecimal(v1.innerProduct( v2 ));
         BigDecimal v1Norm = new BigDecimal(v1.norm());
         BigDecimal v2Norm = new BigDecimal(v2.norm());
-        BigDecimal radAngle = new BigDecimal(Math.acos(innerProduct.divide(v1Norm.multiply(v2Norm), BigDecimal.ROUND_HALF_EVEN).doubleValue()));
+        BigDecimal radAngle = new BigDecimal(Math.acos(innerProduct.divide(v1Norm.multiply(v2Norm), SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
+
+
 
         LOGGER.error(innerProduct);
         LOGGER.error(v1Norm);
         LOGGER.error(v2Norm);
         LOGGER.error(radAngle);
-        return radAngle.divide(new BigDecimal(Math.PI), BigDecimal.ROUND_HALF_EVEN);
+        return radAngle.divide(new BigDecimal(Math.PI), SCALE, BigDecimal.ROUND_HALF_EVEN);
     }
 
 
@@ -125,7 +127,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         CalculateResponse response = new CalculateResponse();
         response.setGoogleDistance(googleDistance.toPlainString());
         response.setAngle(angle.toPlainString());
-        response.setFinalScore(googleDistance.add(angle).divide(new BigDecimal(2), 5, BigDecimal.ROUND_HALF_EVEN).toPlainString());
+        response.setFinalScore(googleDistance.add(angle).divide(new BigDecimal(2), SCALE, BigDecimal.ROUND_HALF_EVEN).toPlainString());
         LOGGER.info(response.toString());
         LOGGER.info(stopWatch.prettyPrint());
         return response;
