@@ -38,8 +38,8 @@ public class CalculatorServiceImpl implements CalculatorService {
         List<String> commonList = new ArrayList<>();
         commonList.addAll(firstList);
         commonList.retainAll(secondList);//This list might be worth presenting to the end-user
-        double numerator = Math.log(Math.max(firstList.size(), secondList.size())) - Math.log(commonList.size());
-        double denominator = Math.log(wikiArticlesAmount.doubleValue()) - Math.log(Math.min(firstList.size(), secondList.size()));
+        double numerator = Math.log(Math.max(1, Math.max(firstList.size(), secondList.size()))) - Math.log(Math.max(1, commonList.size()));
+        double denominator = Math.log(wikiArticlesAmount.doubleValue()) - Math.log(Math.max(1, Math.min(firstList.size(), secondList.size())));
         BigDecimal result = new BigDecimal(numerator).divide(new BigDecimal(denominator), BigDecimal.ROUND_HALF_EVEN);
         stopWatch.stop();
         LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": running time (millis) = " +  stopWatch.getLastTaskInfo().getTimeMillis());
