@@ -20,9 +20,7 @@ import javax.annotation.PostConstruct;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,10 +49,13 @@ public class WikiServiceImpl implements WikiService {
 
     private static Cache<Pair<String, String>, Integer> BACKLINK_CACHE = CacheBuilder.newBuilder()
             .maximumSize(1000000000L)
-            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .expireAfterWrite(1, TimeUnit.DAYS)
             .build();
 
-    private static Map<String, List<String>> AMBIGUOUS_PAGES_MAP = new HashMap<>(2);
+    private static Cache<String, List<String>> AMBIGUOUS_PAGES_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(1000000000L)
+            .expireAfterWrite(7, TimeUnit.DAYS)
+            .build();
 
     @Autowired
     private RestOperations restOperations;
@@ -68,14 +69,14 @@ public class WikiServiceImpl implements WikiService {
     @PostConstruct
     public void init() {
         for(Pair<String,String> langs : getLanguages()) {
-            if(AMBIGUOUS_PAGES_MAP.get(langs.getValue0()) == null) {
+            if(AMBIGUOUS_PAGES_CACHE.getIfPresent(langs.getValue0()) == null) {
                 if(disambiguationEnabled) {
                     LOGGER.info("Initializing ambiguous pages list for lang:" + langs.getValue0());
-                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), collectAll(ApiTemplate.API_URL_AMBIGUOUS_PAGES, langs.getValue0(), "", false));
+                    AMBIGUOUS_PAGES_CACHE.put(langs.getValue0(), collectAll(ApiTemplate.API_URL_AMBIGUOUS_PAGES, langs.getValue0(), "", false));
                     LOGGER.info("Ambiguous pages list initialized for lang:" + langs.getValue0());
                 }else{
                     LOGGER.info("Ambiguous pages list for lang:" + langs.getValue0()+" disabled");
-                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), new ArrayList<String>());
+                    AMBIGUOUS_PAGES_CACHE.put(langs.getValue0(), new ArrayList<String>());
                 }
             }
         }
@@ -153,7 +154,7 @@ public class WikiServiceImpl implements WikiService {
 
     @Override
     public List<String> getForbiddenArticleTitles(String language) {
-        return AMBIGUOUS_PAGES_MAP.get(language);
+        return AMBIGUOUS_PAGES_CACHE.getIfPresent(language);
     }
 
     @Override
@@ -179,6 +180,9 @@ public class WikiServiceImpl implements WikiService {
         if(result == null){
             result = getReferencesToArticle(language, search).size();
             BACKLINK_CACHE.put(key, result);
+            LOGGER.info("Cache put: "+language+", "+search+": "+result);
+        }else{
+            LOGGER.info("Cache hit: "+language+", "+search+": "+result);
         }
         return result;
     }
