@@ -2,8 +2,11 @@ package pl.edu.pw.elka.studia.wedt.controller;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.StopWatch;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,6 +31,9 @@ public class MainController {
 
     @Autowired
     private CalculatorService calcService;
+
+    @Autowired
+    StopWatch stopWatch;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index(ModelMap model) {
