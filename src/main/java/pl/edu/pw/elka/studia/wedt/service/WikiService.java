@@ -16,4 +16,5 @@ public interface WikiService {
     List<String> getForbiddenArticleTitles(String language);
     List<String> getReferencesOfArticle(String language, String search);
     List<String> getReferencesToArticle(String language, String search);
+    Integer getReferencesToArticleAmount(String language, String search);
 }
