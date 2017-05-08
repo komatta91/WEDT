@@ -78,7 +78,7 @@ public class WikiServiceImpl implements WikiService {
         List<String> result = new ArrayList<>();
         String continueToken = "";
         StopWatch requestStopWatch = new StopWatch(WikiServiceImpl.class.getSimpleName());
-        requestStopWatch.start(apiTemplate.name());
+        requestStopWatch.start(apiTemplate.name()+": "+language+", "+search);
         try {
             while (continueToken != null) {
                 String url = MessageFormat.format(apiTemplate.getTemplate(), language, search, continueToken);
