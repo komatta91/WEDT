@@ -11,7 +11,6 @@ import org.springframework.util.StopWatch;
 import pl.edu.pw.elka.studia.wedt.service.CalculatorService;
 import pl.edu.pw.elka.studia.wedt.service.WikiService;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
