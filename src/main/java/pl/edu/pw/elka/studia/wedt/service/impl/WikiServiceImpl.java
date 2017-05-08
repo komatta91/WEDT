@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestOperations;
 import pl.edu.pw.elka.studia.wedt.service.WikiService;
@@ -76,6 +77,8 @@ public class WikiServiceImpl implements WikiService {
     private List<String> collectAll(ApiTemplate apiTemplate, String language, String search, boolean fireOnce){
         List<String> result = new ArrayList<>();
         String continueToken = "";
+        StopWatch requestStopWatch = new StopWatch(WikiServiceImpl.class.getSimpleName());
+        requestStopWatch.start(apiTemplate.name());
         try {
             while (continueToken != null) {
                 String url = MessageFormat.format(apiTemplate.getTemplate(), language, search, continueToken);
@@ -101,6 +104,8 @@ public class WikiServiceImpl implements WikiService {
         } catch (Exception e) {
             LOGGER.error("Exception occurred for url " + apiTemplate + " and search: " + search, e);
         }
+        requestStopWatch.stop();
+        LOGGER.debug(requestStopWatch.prettyPrint());
         return result;
     }
 
