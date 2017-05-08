@@ -97,7 +97,7 @@ function sendAjax( url, data, successFunc, errorFunc ) {
 
 
 function calculate() {
-    waitingDialog.show('Custom message');
+    waitingDialog.show('Pleas wait, calculating...');
     sendAjax( "Calculate", getRequestData(),
         function ( data ) {
             waitingDialog.hide();

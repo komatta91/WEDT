@@ -105,7 +105,7 @@ public class WikiServiceImpl implements WikiService {
             LOGGER.error("Exception occurred for url " + apiTemplate + " and search: " + search, e);
         }
         requestStopWatch.stop();
-        LOGGER.debug(requestStopWatch.prettyPrint());
+        LOGGER.info(requestStopWatch.getLastTaskInfo().getTaskName() + ": running time (millis) = " +  requestStopWatch.getLastTaskInfo().getTimeMillis());
         return result;
     }
 

@@ -1,6 +1,7 @@
 package pl.edu.pw.elka.studia.wedt.service.impl;
 
 import org.apache.log4j.Logger;
+import org.javatuples.Tuple;
 import org.la4j.vector.dense.BasicVector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -8,6 +9,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
+import pl.edu.pw.elka.studia.wedt.controller.response.CalculateResponse;
 import pl.edu.pw.elka.studia.wedt.service.CalculatorService;
 import pl.edu.pw.elka.studia.wedt.service.WikiService;
 
@@ -20,17 +22,13 @@ import java.util.*;
  */
 @Service
 @Lazy
-@Scope(value="request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class CalculatorServiceImpl implements CalculatorService {
+    Logger LOGGER = Logger.getLogger(CalculatorServiceImpl.class);
 
     @Autowired
     private WikiService wikiService;
 
-    private StopWatch stopWatch = new StopWatch("CalculatorServiceImpl");
-
-    Logger LOGGER = Logger.getLogger(CalculatorServiceImpl.class);
-
-    private BigDecimal googleNormalizedDistance(String language, String firstEntry, String secondEntry){
+    private BigDecimal googleNormalizedDistance(StopWatch stopWatch, String language, String firstEntry, String secondEntry){
         //Wiki does not provide backlink count in it's API: https://phabricator.wikimedia.org/T49173
         //therefore counting must be done here
         stopWatch.start("GoogleNormalizedDistance");
@@ -44,11 +42,11 @@ public class CalculatorServiceImpl implements CalculatorService {
         double denominator = Math.log(wikiArticlesAmount.doubleValue()) - Math.log(Math.min(firstList.size(), secondList.size()));
         BigDecimal result = new BigDecimal(numerator).divide(new BigDecimal(denominator), BigDecimal.ROUND_HALF_EVEN);
         stopWatch.stop();
-        LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": " +  stopWatch.getLastTaskInfo().getTimeMillis());
+        LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": running time (millis) = " +  stopWatch.getLastTaskInfo().getTimeMillis());
         return result;
     }
 
-    private BigDecimal angleMeasure(String language, String firstEntry, String secondEntry) {
+    private BigDecimal angleMeasure(StopWatch stopWatch, String language, String firstEntry, String secondEntry) {
         stopWatch.start("AngleMeasure");
         BigInteger wikiArticlesAmount = wikiService.getTotalArticlesNumber(language);
         List<String> firstList = wikiService.getReferencesOfArticle(language, firstEntry);
@@ -59,7 +57,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         Map<String, BigDecimal> secondVector = calculateWeights(language, wikiArticlesAmount,distinctLinks, secondList);
         BigDecimal result = calculateAngle(firstVector, secondVector);
         stopWatch.stop();
-        LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": " +  stopWatch.getLastTaskInfo().getTimeMillis());
+        LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": running time (millis) = " +  stopWatch.getLastTaskInfo().getTimeMillis());
         return result;
     }
 
@@ -95,11 +93,16 @@ public class CalculatorServiceImpl implements CalculatorService {
 
 
     @Override
-    public BigDecimal calculate(String language, String firstEntry, String secondEntry) {
-        BigDecimal result = googleNormalizedDistance(language, firstEntry, secondEntry);
-        googleNormalizedDistance(language, firstEntry, secondEntry);
+    public CalculateResponse calculate(String language, String firstEntry, String secondEntry) {
+        StopWatch stopWatch = new StopWatch(this.getClass().getSimpleName());
+        BigDecimal googleDistance = googleNormalizedDistance(stopWatch, language, firstEntry, secondEntry);
+        BigDecimal angle = angleMeasure(stopWatch, language,firstEntry,secondEntry);
+        CalculateResponse response = new CalculateResponse();
+        response.setGoogleDistance(googleDistance.toPlainString());
+        response.setAngle(angle.toPlainString());
+        response.setFinalScore(googleDistance.add(angle).divide(new BigDecimal(2), 5, BigDecimal.ROUND_HALF_EVEN).toPlainString());
+        LOGGER.info(response.toString());
         LOGGER.info(stopWatch.prettyPrint());
-        return result;
-        //return googleNormalizedDistance(language, firstEntry, secondEntry).add(angleMeasure(language,firstEntry,secondEntry)).divide(new BigDecimal(2), 5, BigDecimal.ROUND_HALF_EVEN);
+        return response;
     }
 }

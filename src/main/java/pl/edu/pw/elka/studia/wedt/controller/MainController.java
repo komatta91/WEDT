@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import pl.edu.pw.elka.studia.wedt.controller.request.CalculateRequest;
 import pl.edu.pw.elka.studia.wedt.controller.request.EntryRequest;
+import pl.edu.pw.elka.studia.wedt.controller.response.CalculateResponse;
 import pl.edu.pw.elka.studia.wedt.service.CalculatorService;
 import pl.edu.pw.elka.studia.wedt.service.WikiService;
 
@@ -55,8 +56,8 @@ public class MainController {
 
     @RequestMapping(value = "/Calculate", method = RequestMethod.POST)
     public @ResponseBody
-    String calculate(@RequestBody CalculateRequest request) {
-        return calcService.calculate(request.getLanguage(), request.getFirstEntry(), request.getSecondEntry()).toPlainString();
+    CalculateResponse calculate(@RequestBody CalculateRequest request) {
+        return calcService.calculate(request.getLanguage(), request.getFirstEntry(), request.getSecondEntry());
 
     }
 
