@@ -27,11 +27,23 @@ import java.util.Map;
 @Service
 public class WikiServiceImpl implements WikiService {
     private static final Logger LOGGER = Logger.getLogger(WikiServiceImpl.class);
-    private static final String API_URL_ARTICLE_LINKS = "https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json&titles={1}{2}";
-    private static final String API_URL_ARTICLE_BACKLINKS = "https://{0}.wikipedia.org/w/api.php?action=query&list=backlinks&bllimit=max&blnamespace=0&format=json&bltitle={1}{2}";
-    private static final String API_URL_AMBIGUOUS_PAGES = "https://{0}.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&cmnamespace=0&cmtype=page&format=json&cmtitle=Category:All_disambiguation_pages{2}";
-    private static final String API_URL_SEARCH = "https://{0}.wikipedia.org/w/api.php?action=query&list=search&srprop=titlesnippet&srlimit=100&format=json&srsearch={1}";
-    private static final String API_URL_STATISTICS = "https://{0}.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=statistics&format=json";
+    private enum ApiTemplate {
+        API_URL_ARTICLE_LINKS("https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json&titles={1}{2}"),
+        API_URL_ARTICLE_BACKLINKS("https://{0}.wikipedia.org/w/api.php?action=query&list=backlinks&bllimit=max&blnamespace=0&format=json&bltitle={1}{2}"),
+        API_URL_AMBIGUOUS_PAGES("https://{0}.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&cmnamespace=0&cmtype=page&format=json&cmtitle=Category:All_disambiguation_pages{2}"),
+        API_URL_SEARCH("https://{0}.wikipedia.org/w/api.php?action=query&list=search&srprop=titlesnippet&srlimit=100&format=json&srsearch={1}"),
+        API_URL_STATISTICS("https://{0}.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=statistics&format=json");
+
+        private String template;
+
+        ApiTemplate(String template) {
+            this.template = template;
+        }
+
+        public String getTemplate() {
+            return template;
+        }
+    }
 
     private static Map<String, List<String>> AMBIGUOUS_PAGES_MAP = new HashMap<>(2);
 
@@ -50,7 +62,7 @@ public class WikiServiceImpl implements WikiService {
             if(AMBIGUOUS_PAGES_MAP.get(langs.getValue0()) == null) {
                 if(disambiguationEnabled) {
                     LOGGER.info("Initializing ambiguous pages list for lang:" + langs.getValue0());
-                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), collectAll(API_URL_AMBIGUOUS_PAGES, langs.getValue0(), "", false));
+                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), collectAll(ApiTemplate.API_URL_AMBIGUOUS_PAGES, langs.getValue0(), "", false));
                     LOGGER.info("Ambiguous pages list initialized for lang:" + langs.getValue0());
                 }else{
                     LOGGER.info("Ambiguous pages list for lang:" + langs.getValue0()+" disabled");
@@ -61,12 +73,12 @@ public class WikiServiceImpl implements WikiService {
     }
 
 
-    private List<String> collectAll(String urlTemplate, String language, String search, boolean fireOnce){
+    private List<String> collectAll(ApiTemplate apiTemplate, String language, String search, boolean fireOnce){
         List<String> result = new ArrayList<>();
         String continueToken = "";
         try {
             while (continueToken != null) {
-                String url = MessageFormat.format(urlTemplate, language, search, continueToken);
+                String url = MessageFormat.format(apiTemplate.getTemplate(), language, search, continueToken);
                 WikiResponse wikiResponse = restOperations.getForObject(url, WikiResponse.class);
                 ContinueToken token = wikiResponse.getContinueToken();
                 if (!fireOnce && token != null) {
@@ -87,7 +99,7 @@ public class WikiServiceImpl implements WikiService {
             List<String> ambiguousArticlesList = getForbiddenArticleTitles(language);
             result.removeAll(ambiguousArticlesList);
         } catch (Exception e) {
-            LOGGER.error("Exception occurred for url " + urlTemplate + " and search: " + search, e);
+            LOGGER.error("Exception occurred for url " + apiTemplate + " and search: " + search, e);
         }
         return result;
     }
@@ -104,7 +116,7 @@ public class WikiServiceImpl implements WikiService {
     public BigInteger getTotalArticlesNumber(String language) {
         BigInteger result = null;
         try {
-            String url = MessageFormat.format(API_URL_STATISTICS, language);
+            String url = MessageFormat.format(ApiTemplate.API_URL_STATISTICS.getTemplate(), language);
             WikiResponse wikiResponse = restOperations.getForObject(url, WikiResponse.class);
             LOGGER.debug(MessageFormat.format("Response for URL {0} is {1}", url, wikiResponse));
             String articleNumber = wikiResponse.getQuery().getStatistics().getArticles();
@@ -120,7 +132,7 @@ public class WikiServiceImpl implements WikiService {
         if(StringUtils.isEmpty(search)) {
             return new ArrayList<>();
         }
-        List<String> entries = collectAll(API_URL_SEARCH, language, search, true);
+        List<String> entries = collectAll(ApiTemplate.API_URL_SEARCH, language, search, true);
         List<String> forbidden = getForbiddenArticleTitles(language);
         entries.removeAll(forbidden);
         return entries;
@@ -136,7 +148,7 @@ public class WikiServiceImpl implements WikiService {
         if(StringUtils.isEmpty(search)) {
             return new ArrayList<>();
         }
-        return collectAll(API_URL_ARTICLE_LINKS, language, search, false);
+        return collectAll(ApiTemplate.API_URL_ARTICLE_LINKS, language, search, false);
     }
 
     @Override
@@ -144,7 +156,7 @@ public class WikiServiceImpl implements WikiService {
         if(StringUtils.isEmpty(search)) {
             return new ArrayList<>();
         }
-        return collectAll(API_URL_ARTICLE_BACKLINKS, language, search, false);
+        return collectAll(ApiTemplate.API_URL_ARTICLE_BACKLINKS, language, search, false);
     }
 
 }
