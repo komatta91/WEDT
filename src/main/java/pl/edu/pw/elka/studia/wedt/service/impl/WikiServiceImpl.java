@@ -50,7 +50,7 @@ public class WikiServiceImpl implements WikiService {
             if(AMBIGUOUS_PAGES_MAP.get(langs.getValue0()) == null) {
                 if(disambiguationEnabled) {
                     LOGGER.info("Initializing ambiguous pages list for lang:" + langs.getValue0());
-                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), collectAll(API_URL_AMBIGUOUS_PAGES, langs.getValue0(), ""));
+                    AMBIGUOUS_PAGES_MAP.put(langs.getValue0(), collectAll(API_URL_AMBIGUOUS_PAGES, langs.getValue0(), "", false));
                     LOGGER.info("Ambiguous pages list initialized for lang:" + langs.getValue0());
                 }else{
                     LOGGER.info("Ambiguous pages list for lang:" + langs.getValue0()+" disabled");
@@ -61,7 +61,7 @@ public class WikiServiceImpl implements WikiService {
     }
 
 
-    private List<String> collectAll(String urlTemplate, String language, String search){
+    private List<String> collectAll(String urlTemplate, String language, String search, boolean fireOnce){
         List<String> result = new ArrayList<>();
         String continueToken = "";
         try {
@@ -69,7 +69,7 @@ public class WikiServiceImpl implements WikiService {
                 String url = MessageFormat.format(urlTemplate, language, search, continueToken);
                 WikiResponse wikiResponse = restOperations.getForObject(url, WikiResponse.class);
                 ContinueToken token = wikiResponse.getContinueToken();
-                if (token != null) {
+                if (!fireOnce && token != null) {
                     continueToken = MessageFormat.format("&{0}={1}", token.getParameterName(), token.getContinueToken());
                 } else {
                     continueToken = null;
@@ -120,7 +120,7 @@ public class WikiServiceImpl implements WikiService {
         if(StringUtils.isEmpty(search)) {
             return new ArrayList<>();
         }
-        List<String> entries = collectAll(API_URL_SEARCH, language, search);
+        List<String> entries = collectAll(API_URL_SEARCH, language, search, true);
         List<String> forbidden = getForbiddenArticleTitles(language);
         entries.removeAll(forbidden);
         return entries;
@@ -136,7 +136,7 @@ public class WikiServiceImpl implements WikiService {
         if(StringUtils.isEmpty(search)) {
             return new ArrayList<>();
         }
-        return collectAll(API_URL_ARTICLE_LINKS, language, search);
+        return collectAll(API_URL_ARTICLE_LINKS, language, search, false);
     }
 
     @Override
@@ -144,7 +144,7 @@ public class WikiServiceImpl implements WikiService {
         if(StringUtils.isEmpty(search)) {
             return new ArrayList<>();
         }
-        return collectAll(API_URL_ARTICLE_BACKLINKS, language, search);
+        return collectAll(API_URL_ARTICLE_BACKLINKS, language, search, false);
     }
 
 }
