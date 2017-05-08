@@ -14,8 +14,6 @@ import pl.edu.pw.elka.studia.wedt.service.CalculatorService;
 import pl.edu.pw.elka.studia.wedt.service.WikiService;
 
 import javax.annotation.PostConstruct;
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,8 +49,8 @@ public class MainController {
 
     @RequestMapping(value = "/Calculate", method = RequestMethod.POST)
     public @ResponseBody
-    BigDecimal calculate(@RequestBody CalculateRequest request) {
-        return calcService.calculate(request.getLanguage(), request.getFirstEntry(), request.getSecondEntry());
+    String calculate(@RequestBody CalculateRequest request) {
+        return calcService.calculate(request.getLanguage(), request.getFirstEntry(), request.getSecondEntry()).toPlainString();
 
     }
 

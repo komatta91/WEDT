@@ -1,8 +1,5 @@
 package pl.edu.pw.elka.studia.wedt.service.impl;
 
-import org.la4j.*;
-import org.la4j.Vector;
-import org.la4j.vector.VectorFactory;
 import org.la4j.vector.dense.BasicVector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -37,7 +34,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         double numerator = Math.log(Math.max(firstList.size(), secondList.size())) - Math.log(commonList.size());
         double denominator = Math.log(wikiArticlesAmount.doubleValue()) - Math.log(Math.min(firstList.size(), secondList.size()));
 
-        return new BigDecimal(numerator).divide(new BigDecimal(denominator));
+        return new BigDecimal(numerator).divide(new BigDecimal(denominator), BigDecimal.ROUND_HALF_EVEN);
     }
 
     private BigDecimal angleMeasure(String language, String firstEntry, String secondEntry) {
@@ -59,7 +56,7 @@ public class CalculatorServiceImpl implements CalculatorService {
                 result.put(link, new BigDecimal(0));
             } else {
                 int backLinkCount = wikiService.getReferencesToArticle(language, link).size();
-                result.put(link, new BigDecimal(Math.log(new BigDecimal(wikiArticlesAmount.toString()).divide(new BigDecimal(backLinkCount)).doubleValue())));
+                result.put(link, new BigDecimal(Math.log(new BigDecimal(wikiArticlesAmount.toString()).divide(new BigDecimal(backLinkCount), BigDecimal.ROUND_HALF_EVEN).doubleValue())));
             }
         }
         return result;
@@ -77,8 +74,8 @@ public class CalculatorServiceImpl implements CalculatorService {
         BigDecimal innerProduct = new BigDecimal(v1.innerProduct( v2 ));
         BigDecimal v1Norm = new BigDecimal(v1.norm());
         BigDecimal v2Norm = new BigDecimal(v2.norm());
-        BigDecimal radAngle = innerProduct.divide(v1Norm.multiply(v2Norm));
-        return new BigDecimal(Math.acos(radAngle.divide(new BigDecimal(Math.PI)).doubleValue()));
+        BigDecimal radAngle = innerProduct.divide(v1Norm.multiply(v2Norm), BigDecimal.ROUND_HALF_EVEN);
+        return new BigDecimal(Math.acos(radAngle.divide(new BigDecimal(Math.PI), BigDecimal.ROUND_HALF_EVEN).doubleValue()));
     }
 
 
