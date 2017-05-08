@@ -110,7 +110,7 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>21.0</version>
-    </dependency>
+        </dependency>
     </dependencies>
 	
 	
@@ -151,10 +151,10 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.mortbay.jetty</groupId>
+            <plugin><!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-maven-plugin -->
+                <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <version>8.1.5.v20120716</version>
+                <version>9.3.3.v20150827</version>
                 <configuration>
                     <systemProperties>
                         <systemProperty>
