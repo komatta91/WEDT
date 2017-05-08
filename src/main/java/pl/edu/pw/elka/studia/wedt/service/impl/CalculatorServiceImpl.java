@@ -23,7 +23,7 @@ import java.util.*;
 @Service
 @Lazy
 public class CalculatorServiceImpl implements CalculatorService {
-    Logger LOGGER = Logger.getLogger(CalculatorServiceImpl.class);
+    private Logger LOGGER = Logger.getLogger(CalculatorServiceImpl.class);
 
     @Autowired
     private WikiService wikiService;
@@ -68,7 +68,7 @@ public class CalculatorServiceImpl implements CalculatorService {
             if (!existingList.contains(link)) {
                 result.put(link, new BigDecimal(0));
             } else {
-                int backLinkCount = wikiService.getReferencesToArticle(language, link).size();
+                int backLinkCount = wikiService.getReferencesToArticleAmount(language, link);
                 result.put(link, new BigDecimal(Math.log(new BigDecimal(wikiArticlesAmount.toString()).divide(new BigDecimal(backLinkCount), BigDecimal.ROUND_HALF_EVEN).doubleValue())));
             }
         }

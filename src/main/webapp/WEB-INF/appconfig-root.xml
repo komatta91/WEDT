@@ -23,14 +23,4 @@
     </bean>
     <bean class="org.springframework.web.client.RestTemplate" />
 
-
-    <!--bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager" lazy-init="true">
-        <property name="dataSource" ref="georoutingDataSource"/>
-    </bean-->
-
-    <bean id="stopWatch" class="org.springframework.util.StopWatch" lazy-init="true">
-        <property name="keepTaskList" value="false"/>
-    </bean>
-
-
 </beans>

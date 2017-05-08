@@ -25,16 +25,12 @@ import java.util.List;
  */
 @Controller
 public class MainController {
-    private Logger logger = Logger.getLogger(MainController.class);
 
     @Autowired
     private WikiService wikiService;
 
     @Autowired
     private CalculatorService calcService;
-
-    @Autowired
-    StopWatch stopWatch;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index(ModelMap model) {

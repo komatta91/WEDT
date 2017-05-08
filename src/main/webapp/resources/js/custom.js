@@ -97,7 +97,7 @@ function sendAjax( url, data, successFunc, errorFunc ) {
 
 
 function calculate() {
-    waitingDialog.show('Pleas wait, calculating...');
+    waitingDialog.show('Pleas wait, calculating...', {progressType: 'success'});
     sendAjax( "Calculate", getRequestData(),
         function ( data ) {
             waitingDialog.hide();
