@@ -21,6 +21,26 @@
             </list>
         </property>
     </bean>
-    <bean class="org.springframework.web.client.RestTemplate" />
+
+    <!--https://github.com/sayseakleng/spring-resttemplate-apache-4.5.x/blob/master/client/src/main/resources/appcontext-client.xml-->
+    <bean id="poolingHttpClientConnectionManager" class="org.apache.http.impl.conn.PoolingHttpClientConnectionManager"
+          destroy-method="shutdown">
+        <property name="maxTotal" value="50"/>
+        <property name="defaultMaxPerRoute" value="50"/>
+    </bean>
+    <bean class="org.springframework.web.client.RestTemplate" >
+        <constructor-arg>
+            <bean class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory" destroy-method="destroy">
+                <constructor-arg >
+                    <bean class="org.apache.http.impl.client.HttpClients" factory-method="createMinimal">
+                        <constructor-arg ref="poolingHttpClientConnectionManager"/>
+                    </bean>
+                </constructor-arg>
+                <!-- <constructor-arg index="1" value="false"/> -->
+                <property name="readTimeout" value="60000" />
+                <property name="connectTimeout" value="60000" />
+            </bean>
+        </constructor-arg>
+    </bean>
 
 </beans>
