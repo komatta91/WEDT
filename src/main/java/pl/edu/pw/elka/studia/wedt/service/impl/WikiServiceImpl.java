@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,6 +67,9 @@ public class WikiServiceImpl implements WikiService {
     @Value("${wiki.api.use.disambiguation:true}")
     private Boolean disambiguationEnabled;
 
+    @Value("#{${wiki.api.assume.backlinks.en}}")
+    private Map<String,String> assumedBacklinksEn;
+
     @PostConstruct
     public void init() {
         for(Pair<String,String> langs : getLanguages()) {
@@ -80,6 +84,11 @@ public class WikiServiceImpl implements WikiService {
                 }
             }
         }
+        for(String key : assumedBacklinksEn.keySet()){
+            BACKLINK_CACHE.put(new Pair<>("en", "International Standard Book Number"), 658364);
+            LOGGER.info("Assuming backlinks amount for "+key+" : "+ assumedBacklinksEn.get(key));
+        }
+
     }
 
 
