@@ -2,6 +2,10 @@ package pl.edu.pw.elka.studia.wedt.service.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,9 @@ import pl.edu.pw.elka.studia.wedt.service.impl.api.ContinueToken;
 import pl.edu.pw.elka.studia.wedt.service.impl.api.WikiResponse;
 
 import javax.annotation.PostConstruct;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -48,6 +55,28 @@ public class WikiServiceImpl implements WikiService {
         }
     }
 
+    private static String BACKLINK_CACHE_FILE = "backlinks_en.cache";
+    private static void saveBigBacklink(String key, String val){
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(BACKLINK_CACHE_FILE, true));
+            writer.writeNext(new String[]{key, val});
+            writer.close();
+        } catch (IOException e) {
+            LOGGER.error(e);
+        }
+    }
+    private static void loadBigBacklinks(){
+        try{
+            CSVReader reader = new CSVReader(new FileReader(BACKLINK_CACHE_FILE));
+            String [] nextLine;
+            while ((nextLine = reader.readNext()) != null) {
+                BACKLINK_CACHE.put(new Pair<>("en", nextLine[0]), Integer.parseInt(nextLine[1]));
+                LOGGER.info("Assuming backlinks amount for en, "+nextLine[0]+": "+ nextLine[1]);
+            }
+        } catch (IOException|NumberFormatException e) {
+            LOGGER.error(e);
+        }
+    }
     private static Cache<Pair<String, String>, Integer> BACKLINK_CACHE = CacheBuilder.newBuilder()
             .maximumSize(1000000000L)
             .expireAfterWrite(1, TimeUnit.DAYS)
@@ -84,11 +113,7 @@ public class WikiServiceImpl implements WikiService {
                 }
             }
         }
-        for(String key : assumedBacklinksEn.keySet()){
-            BACKLINK_CACHE.put(new Pair<>("en", key), Integer.parseInt(assumedBacklinksEn.get(key)));
-            LOGGER.info("Assuming backlinks amount for en, "+key+" : "+ assumedBacklinksEn.get(key));
-        }
-
+        loadBigBacklinks();
     }
 
 
@@ -190,6 +215,9 @@ public class WikiServiceImpl implements WikiService {
             result = getReferencesToArticle(language, search).size();
             BACKLINK_CACHE.put(key, result);
             LOGGER.info("Cache put: "+language+", "+search+": "+result);
+            if(result > 50000){
+                saveBigBacklink(search, result.toString());
+            }
         }else{
             LOGGER.info("Cache hit: "+language+", "+search+": "+result);
         }
