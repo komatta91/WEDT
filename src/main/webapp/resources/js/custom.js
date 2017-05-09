@@ -1,5 +1,6 @@
 var finalScore;
-
+var googleDistance;
+var angleMeasure;
 function init() {
     $('.selectpicker').selectpicker();
     var options = {
@@ -33,6 +34,9 @@ function init() {
     $('#secondEntry').ajaxSelectPicker(options);
 
     $('#language').on('change', function(){
+        finalScore.refresh(1);
+        googleDistance.refresh(1);
+        angleMeasure.refresh(1);
         $("#calculatedResult").html('');
         var language = $('#language option:selected').val();
         $("#firstEntry").selectpicker('deselectAll');
@@ -60,18 +64,22 @@ function init() {
     });
 
     $('#firstEntry').on('change', function(){
-        $("#calculatedResult").html('');
+        finalScore.refresh(1);
+        googleDistance.refresh(1);
+        angleMeasure.refresh(1);
 
     });
 
     $('#secondEntry').on('change', function(){
-        $("#calculatedResult").html('');
+        finalScore.refresh(1);
+        googleDistance.refresh(1);
+        angleMeasure.refresh(1);
     });
 
 
     finalScore = new JustGage({
         id: "finalScore",
-        value: 0,
+        value: 1,
         min: 0,
         max: 1,
         label: "Final Score",
@@ -80,7 +88,32 @@ function init() {
         textRenderer: function(val) {
             return Number((parseFloat(val)).toFixed(5));
         },
+    });
 
+    googleDistance = new JustGage({
+        id: "googleDistance",
+        value: 1,
+        min: 0,
+        max: 1,
+        label: "Google Distance",
+        pointer: true,
+        reverse: true,
+        textRenderer: function(val) {
+            return Number((parseFloat(val)).toFixed(5));
+        },
+    });
+
+    angleMeasure = new JustGage({
+        id: "angleMeasure",
+        value: 1,
+        min: 0,
+        max: 1,
+        label: "Angle Measure",
+        pointer: true,
+        reverse: true,
+        textRenderer: function(val) {
+            return Number((parseFloat(val)).toFixed(5));
+        },
     });
 
 };
@@ -117,21 +150,10 @@ function calculate() {
     waitingDialog.show('Pleas wait, calculating...', {progressType: 'success'});
     sendAjax( "Calculate", getRequestData(),
         function ( data ) {
-            waitingDialog.hide();
-            /*{"googleDistance":"0.16501937802601043082","angle":"0.21956580435719540099","finalScore":"0.19229259119160291590"}*/
-
-            //console.log(data.finalScore);
-            //console.log(parseFloat(data.finalScore));
             finalScore.refresh(data.finalScore);
-
-            /*
-            if (data )
-            {
-                $("#calculatedResult").html("Result: " + data.finalScore)
-            } else {
-                $("#calculatedResult").html("Result: invalid data")
-            }
-            */
+            googleDistance.refresh(data.googleDistance);
+            angleMeasure.refresh(data.angle);
+            waitingDialog.hide();
         },
         function (e) {
             console.log( e );

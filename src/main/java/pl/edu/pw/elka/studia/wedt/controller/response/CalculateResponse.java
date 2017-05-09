@@ -31,13 +31,4 @@ public class CalculateResponse {
     public void setFinalScore(String finalScore) {
         this.finalScore = finalScore;
     }
-
-    @Override
-    public String toString() {
-        return "CalculateResponse{" +
-                "googleDistance='" + googleDistance + '\'' +
-                ", angle='" + angle + '\'' +
-                ", finalScore='" + finalScore + '\'' +
-                '}';
-    }
 }

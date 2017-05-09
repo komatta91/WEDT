@@ -108,13 +108,6 @@ public class CalculatorServiceImpl implements CalculatorService {
         BigDecimal v1Norm = new BigDecimal(v1.norm());
         BigDecimal v2Norm = new BigDecimal(v2.norm());
         BigDecimal radAngle = new BigDecimal(Math.acos(innerProduct.divide(v1Norm.multiply(v2Norm), SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
-
-
-
-        LOGGER.error(innerProduct);
-        LOGGER.error(v1Norm);
-        LOGGER.error(v2Norm);
-        LOGGER.error(radAngle);
         return radAngle.divide(new BigDecimal(Math.PI), SCALE, BigDecimal.ROUND_HALF_EVEN);
     }
 
