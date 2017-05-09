@@ -20,6 +20,9 @@
                 <value>classpath:application.properties</value>
             </list>
         </property>
+        <property name="fileEncoding">
+            <value>UTF-8</value>
+        </property>
     </bean>
 
     <!--https://github.com/sayseakleng/spring-resttemplate-apache-4.5.x/blob/master/client/src/main/resources/appcontext-client.xml-->
