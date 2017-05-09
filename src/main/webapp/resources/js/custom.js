@@ -1,3 +1,5 @@
+var finalScore;
+
 function init() {
     $('.selectpicker').selectpicker();
     var options = {
@@ -66,6 +68,20 @@ function init() {
         $("#calculatedResult").html('');
     });
 
+
+    finalScore = new JustGage({
+        id: "finalScore",
+        value: 0,
+        min: 0,
+        max: 1,
+        label: "Final Score",
+        pointer: true,
+        textRenderer: function(val) {
+            return Number((parseFloat(val)).toFixed(5));
+        },
+
+    });
+
 };
 
 function getRequestData() {
@@ -101,13 +117,20 @@ function calculate() {
     sendAjax( "Calculate", getRequestData(),
         function ( data ) {
             waitingDialog.hide();
-            if (data >= 0)
+            /*{"googleDistance":"0.16501937802601043082","angle":"0.21956580435719540099","finalScore":"0.19229259119160291590"}*/
+
+            //console.log(data.finalScore);
+            //console.log(parseFloat(data.finalScore));
+            finalScore.refresh(data.finalScore);
+
+            /*
+            if (data )
             {
-                $("#calculatedResult").html("Result: " + data)
+                $("#calculatedResult").html("Result: " + data.finalScore)
             } else {
                 $("#calculatedResult").html("Result: invalid data")
             }
-
+            */
         },
         function (e) {
             console.log( e );
