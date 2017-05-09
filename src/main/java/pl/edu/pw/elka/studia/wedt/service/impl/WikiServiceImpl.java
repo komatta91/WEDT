@@ -65,10 +65,9 @@ public class WikiServiceImpl implements WikiService {
             .expireAfterWrite(7, TimeUnit.DAYS)
             .build();
 
-    private static String BACKLINK_CACHE_FILE = "backlinks_en.cache";
     private void saveBigBacklink(String key, String val){
         try {
-            CSVWriter writer = new CSVWriter(new FileWriter(BACKLINK_CACHE_FILE, true));
+            CSVWriter writer = new CSVWriter(new FileWriter(assumeBacklinksFile, true));
             writer.writeNext(new String[]{key, val});
             writer.close();
         } catch (IOException e) {
@@ -78,7 +77,7 @@ public class WikiServiceImpl implements WikiService {
     private void loadBigBacklinks(){
         if(assumeBacklinks) {
             try {
-                CSVReader reader = new CSVReader(new FileReader(BACKLINK_CACHE_FILE));
+                CSVReader reader = new CSVReader(new FileReader(assumeBacklinksFile));
                 String[] nextLine;
                 while ((nextLine = reader.readNext()) != null) {
                     BACKLINK_CACHE.put(new Pair<>("en", nextLine[0]), Integer.parseInt(nextLine[1]));
@@ -101,6 +100,12 @@ public class WikiServiceImpl implements WikiService {
 
     @Value("${wiki.api.assume.backlinks:true}")
     private Boolean assumeBacklinks;
+
+    @Value("${wiki.api.assume.backlinks.file:backlinks_en.cache}")
+    private String assumeBacklinksFile;
+
+    @Value("${wiki.api.assume.backlinks.threshold:50000}")
+    private Integer assumeBacklinksThreshold;
 
     @PostConstruct
     public void init() {
