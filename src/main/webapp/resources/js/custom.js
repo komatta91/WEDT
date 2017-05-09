@@ -76,6 +76,7 @@ function init() {
         max: 1,
         label: "Final Score",
         pointer: true,
+        reverse: true,
         textRenderer: function(val) {
             return Number((parseFloat(val)).toFixed(5));
         },
