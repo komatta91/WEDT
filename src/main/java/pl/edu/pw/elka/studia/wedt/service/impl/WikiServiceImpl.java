@@ -85,8 +85,8 @@ public class WikiServiceImpl implements WikiService {
             }
         }
         for(String key : assumedBacklinksEn.keySet()){
-            BACKLINK_CACHE.put(new Pair<>("en", "International Standard Book Number"), 658364);
-            LOGGER.info("Assuming backlinks amount for "+key+" : "+ assumedBacklinksEn.get(key));
+            BACKLINK_CACHE.put(new Pair<>("en", key), Integer.parseInt(assumedBacklinksEn.get(key)));
+            LOGGER.info("Assuming backlinks amount for en, "+key+" : "+ assumedBacklinksEn.get(key));
         }
 
     }
