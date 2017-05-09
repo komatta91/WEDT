@@ -55,28 +55,6 @@ public class WikiServiceImpl implements WikiService {
         }
     }
 
-    private static String BACKLINK_CACHE_FILE = "backlinks_en.cache";
-    private static void saveBigBacklink(String key, String val){
-        try {
-            CSVWriter writer = new CSVWriter(new FileWriter(BACKLINK_CACHE_FILE, true));
-            writer.writeNext(new String[]{key, val});
-            writer.close();
-        } catch (IOException e) {
-            LOGGER.error(e);
-        }
-    }
-    private static void loadBigBacklinks(){
-        try{
-            CSVReader reader = new CSVReader(new FileReader(BACKLINK_CACHE_FILE));
-            String [] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
-                BACKLINK_CACHE.put(new Pair<>("en", nextLine[0]), Integer.parseInt(nextLine[1]));
-                LOGGER.info("Assuming backlinks amount for en, "+nextLine[0]+": "+ nextLine[1]);
-            }
-        } catch (IOException|NumberFormatException e) {
-            LOGGER.error(e);
-        }
-    }
     private static Cache<Pair<String, String>, Integer> BACKLINK_CACHE = CacheBuilder.newBuilder()
             .maximumSize(1000000000L)
             .expireAfterWrite(1, TimeUnit.DAYS)
@@ -87,6 +65,31 @@ public class WikiServiceImpl implements WikiService {
             .expireAfterWrite(7, TimeUnit.DAYS)
             .build();
 
+    private static String BACKLINK_CACHE_FILE = "backlinks_en.cache";
+    private void saveBigBacklink(String key, String val){
+        try {
+            CSVWriter writer = new CSVWriter(new FileWriter(BACKLINK_CACHE_FILE, true));
+            writer.writeNext(new String[]{key, val});
+            writer.close();
+        } catch (IOException e) {
+            LOGGER.error(e);
+        }
+    }
+    private void loadBigBacklinks(){
+        if(assumeBacklinks) {
+            try {
+                CSVReader reader = new CSVReader(new FileReader(BACKLINK_CACHE_FILE));
+                String[] nextLine;
+                while ((nextLine = reader.readNext()) != null) {
+                    BACKLINK_CACHE.put(new Pair<>("en", nextLine[0]), Integer.parseInt(nextLine[1]));
+                    LOGGER.info("Assuming backlinks amount for en, " + nextLine[0] + ": " + nextLine[1]);
+                }
+            } catch (IOException | NumberFormatException e) {
+                LOGGER.error(e);
+            }
+        }
+    }
+
     @Autowired
     private RestOperations restOperations;
 
@@ -96,8 +99,8 @@ public class WikiServiceImpl implements WikiService {
     @Value("${wiki.api.use.disambiguation:true}")
     private Boolean disambiguationEnabled;
 
-    @Value("#{${wiki.api.assume.backlinks.en}}")
-    private Map<String,String> assumedBacklinksEn;
+    @Value("${wiki.api.assume.backlinks:true}")
+    private Boolean assumeBacklinks;
 
     @PostConstruct
     public void init() {
