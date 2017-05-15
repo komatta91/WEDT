@@ -151,7 +151,9 @@ public class WikiServiceImpl implements WikiService {
                 }
             }
             List<String> ambiguousArticlesList = getForbiddenArticleTitles(language);
-            result.removeAll(ambiguousArticlesList);
+            if(ambiguousArticlesList != null) {
+                result.removeAll(ambiguousArticlesList);
+            }
         } catch (Exception e) {
             LOGGER.error("Exception occurred for url " + apiTemplate + " and search: " + search, e);
         }
