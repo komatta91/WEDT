@@ -2,8 +2,6 @@ package pl.edu.pw.elka.studia.wedt.service.impl;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import org.apache.http.client.utils.URIBuilder;
@@ -26,10 +24,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,7 +41,7 @@ public class WikiServiceImpl implements WikiService {
         API_URL_ARTICLE_LINKS("https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json","titles"),
         API_URL_ARTICLE_BACKLINKS("https://{0}.wikipedia.org/w/api.php?action=query&list=backlinks&bllimit=max&blnamespace=0&format=json", "bltitle"),
         API_URL_AMBIGUOUS_PAGES("https://{0}.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&cmnamespace=0&cmtype=page&format=json&cmtitle=Category:All_disambiguation_pages", null),
-        API_URL_SEARCH("https://{0}.wikipedia.org/w/api.php?action=query&list=search&srprop=titlesnippet&srlimit=100&format=json", "srsearch"),
+        API_URL_SEARCH("https://{0}.wikipedia.org/w/api.php?action=query&list=search&srprop=titlesnippet&srlimit=30&format=json", "srsearch"),
         API_URL_STATISTICS("https://{0}.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=statistics&format=json",null);
 
         private String template;
@@ -151,7 +150,9 @@ public class WikiServiceImpl implements WikiService {
                 if(wikiResponse.getQuery() == null){//wiki api slack
                     throw new Exception(restOperations.getForObject(builder.build(), String.class));
                 }
-                continueToken = wikiResponse.getContinueToken();
+                if(!fireOnce) {
+                    continueToken = wikiResponse.getContinueToken();
+                }
                 List<ArticleTitle> articleTitleList;
                 if (wikiResponse.getQuery().getPages() != null) {
                     articleTitleList = wikiResponse.getQuery().getPages().getQueryResult().getArticleTitleList();
