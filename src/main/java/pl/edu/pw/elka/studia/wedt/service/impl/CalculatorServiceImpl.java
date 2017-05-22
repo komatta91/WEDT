@@ -65,27 +65,35 @@ public class CalculatorServiceImpl implements CalculatorService {
         return result;
     }
 
-    private Map<String, BigDecimal> calculateWeights(final String language,  BigInteger wikiArticlesAmount, Set<String> distinctLinks, List<String> existingList) {
+    private Map<String, BigDecimal> calculateWeights(final String language, final BigInteger wikiArticlesAmount, Set<String> distinctLinks, List<String> existingList) {
         Map<String, BigDecimal> result = new HashMap<>(distinctLinks.size());
         ExecutorService executor = Executors.newFixedThreadPool(25);
-        List<Future<Pair<String, Integer>>> results = new ArrayList<>();
+        List<Future<Pair<String, BigDecimal>>> results = new ArrayList<>();
 
         for (final String link: distinctLinks) {
             if (!existingList.contains(link)) {
-                result.put(link, new BigDecimal(0));
-            } else {
-                results.add(executor.submit(new Callable<Pair<String, Integer>>() {
+                results.add(executor.submit(new Callable<Pair<String, BigDecimal>>() {
                     @Override
-                    public Pair<String, Integer> call() throws Exception {
-                        return new Pair<>(link, wikiService.getReferencesToArticleAmount(language, link));
+                    public Pair<String, BigDecimal> call() throws Exception {
+                        return new Pair<>(link, new BigDecimal(0));
+                    }
+                }));
+            } else {
+                results.add(executor.submit(new Callable<Pair<String, BigDecimal>>() {
+                    @Override
+                    public Pair<String, BigDecimal> call() throws Exception {
+                        BigDecimal wikiAmmount = new BigDecimal(wikiArticlesAmount.toString());
+                        BigDecimal refAmmount = new BigDecimal(wikiService.getReferencesToArticleAmount(language, link));
+                        BigDecimal result = new BigDecimal(Math.log(wikiAmmount.divide(refAmmount, SCALE, BigDecimal.ROUND_HALF_EVEN ).doubleValue()));
+                        return new Pair<>(link, result);
                     }
                 }));
             }
         }
-        for (Future<Pair<String, Integer>> future: results) {
+        for (Future<Pair<String, BigDecimal>> future: results) {
             try {
-                Pair<String, Integer> pair = future.get();
-                result.put(pair.getValue0(), new BigDecimal(pair.getValue1()));
+                Pair<String, BigDecimal> pair = future.get();
+                result.put(pair.getValue0(), pair.getValue1());
             } catch (Exception e) {
                 LOGGER.error(e);
             }
@@ -108,6 +116,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         BigDecimal v1Norm = new BigDecimal(v1.norm());
         BigDecimal v2Norm = new BigDecimal(v2.norm());
         BigDecimal radAngle = new BigDecimal(Math.acos(innerProduct.divide(v1Norm.multiply(v2Norm), SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
+        LOGGER.info("radAngle: " + radAngle);
         return radAngle.divide(new BigDecimal(Math.PI), SCALE, BigDecimal.ROUND_HALF_EVEN);
     }
 
