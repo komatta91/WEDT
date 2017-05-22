@@ -54,6 +54,8 @@ public class CalculatorServiceImpl implements CalculatorService {
 
     private BigDecimal angleMeasure(StopWatch stopWatch, String language, String firstEntry, String secondEntry) {
         stopWatch.start("AngleMeasure");
+
+        
         BigInteger wikiArticlesAmount = wikiService.getTotalArticlesNumber(language);
         List<String> firstList = wikiService.getReferencesOfArticle(language, firstEntry);
         List<String> secondList = wikiService.getReferencesOfArticle(language, secondEntry);
