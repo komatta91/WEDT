@@ -3,6 +3,8 @@ package pl.edu.pw.elka.studia.wedt.service.impl;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 import org.javatuples.Tuple;
+import org.la4j.LinearAlgebra;
+import org.la4j.operation.VectorOperation;
 import org.la4j.vector.dense.BasicVector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -61,9 +63,10 @@ public class CalculatorServiceImpl implements CalculatorService {
         List<String> secondList = wikiService.getReferencesOfArticle(language, secondEntry);
         Set<String> distinctLinks = new LinkedHashSet<>(firstList);
         distinctLinks.addAll(secondList);
+
         Map<String, BigDecimal> firstVector = calculateWeights(language, wikiArticlesAmount, distinctLinks, firstList);
         Map<String, BigDecimal> secondVector = calculateWeights(language, wikiArticlesAmount, distinctLinks, secondList);
-
+/*
         StringBuilder message = new StringBuilder();
         for (String key : distinctLinks) {
             message.append("Key: " + key);
@@ -82,8 +85,11 @@ public class CalculatorServiceImpl implements CalculatorService {
             message.append("\n");
         }
         LOGGER.info(message.toString());
-
+*/
         BigDecimal result = calculateAngle(firstVector, secondVector);
+        firstList.retainAll(secondList);
+        LOGGER.info("Common links number: " + firstList.size());
+        LOGGER.info("All links number: " + distinctLinks.size());
         stopWatch.stop();
         LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": running time (millis) = " +  stopWatch.getLastTaskInfo().getTimeMillis());
         return result;
@@ -143,11 +149,12 @@ public class CalculatorServiceImpl implements CalculatorService {
             i++;
         }
         BigDecimal innerProduct = new BigDecimal(v1.innerProduct( v2 ));
+
         BigDecimal v1Norm = new BigDecimal(v1.norm());
         BigDecimal v2Norm = new BigDecimal(v2.norm());
         BigDecimal radAngle = new BigDecimal(Math.acos(innerProduct.divide(v1Norm.multiply(v2Norm), SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
         LOGGER.info("radAngle: " + radAngle);
-        return radAngle.divide(new BigDecimal(Math.PI), SCALE, BigDecimal.ROUND_HALF_EVEN);
+        return radAngle.multiply(new BigDecimal(2)).divide(new BigDecimal(Math.PI), SCALE, BigDecimal.ROUND_HALF_EVEN);
     }
 
 
