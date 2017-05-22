@@ -1,11 +1,12 @@
 package pl.edu.pw.elka.studia.wedt.service.impl;
 
 import org.apache.log4j.Logger;
+import org.apache.mahout.math.*;
+import org.apache.mahout.math.Vector;
 import org.javatuples.Pair;
 import org.javatuples.Tuple;
 import org.la4j.LinearAlgebra;
 import org.la4j.operation.VectorOperation;
-import org.la4j.vector.dense.BasicVector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -140,20 +141,21 @@ public class CalculatorServiceImpl implements CalculatorService {
     }
 
     private BigDecimal calculateAngle( Map<String, BigDecimal> firstVector, Map<String, BigDecimal> secondVector) {
-        BasicVector v1 = new BasicVector(firstVector.size());
-        BasicVector v2 = new BasicVector(firstVector.size());
+
+        Vector v1 = new DenseVector(firstVector.size());
+        Vector v2 = new DenseVector(firstVector.size());
         int i = 0;
         for (String vec: firstVector.keySet()) {
             v1.set(i, firstVector.get(vec).doubleValue());
             v2.set(i, secondVector.get(vec).doubleValue());
             i++;
         }
-        BigDecimal innerProduct = new BigDecimal(v1.innerProduct( v2 ));
+        BigDecimal radAngle = new BigDecimal(Math.acos(v1.dot(v2) / (v1.getLengthSquared() * v2.getLengthSquared())));
 
-        BigDecimal v1Norm = new BigDecimal(v1.norm());
-        BigDecimal v2Norm = new BigDecimal(v2.norm());
-        BigDecimal radAngle = new BigDecimal(Math.acos(innerProduct.divide(v1Norm.multiply(v2Norm), SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
-        LOGGER.info("radAngle: " + radAngle);
+        //BigDecimal cosAng = new BigDecimal(v1.dot(v2) / (v1.getLengthSquared() * v2.getLengthSquared()));
+
+        //LOGGER.info("cosAng: " + cosAng.toPlainString());
+        LOGGER.info("radAngle: " + radAngle.toPlainString());
         return radAngle.multiply(new BigDecimal(2)).divide(new BigDecimal(Math.PI), SCALE, BigDecimal.ROUND_HALF_EVEN);
     }
 

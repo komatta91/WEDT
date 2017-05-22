@@ -114,6 +114,12 @@
             <artifactId>opencsv</artifactId>
             <version>3.9</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-math</artifactId>
+            <version>0.13.0</version>
+        </dependency>
     </dependencies>
 	
 	
