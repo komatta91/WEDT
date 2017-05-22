@@ -29,6 +29,8 @@ public class CalculatorServiceImpl implements CalculatorService {
 
     private int SCALE = 20;
 
+    private int N_THREADS = 25;
+
     @Autowired
     private WikiService wikiService;
 
@@ -86,7 +88,7 @@ public class CalculatorServiceImpl implements CalculatorService {
     }
 
     private Map<String, BigDecimal> calculateWeights(final String language, final BigInteger wikiArticlesAmount, Set<String> distinctLinks, List<String> existingList) {
-        ExecutorService executor = Executors.newFixedThreadPool(25);
+        ExecutorService executor = Executors.newFixedThreadPool(N_THREADS);
         List<Future<Pair<String, BigDecimal>>> results = new ArrayList<>();
 
         for (final String link: distinctLinks) {
