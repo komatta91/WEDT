@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -134,7 +135,7 @@ public class WikiServiceImpl implements WikiService {
                 WikiResponse wikiResponse = restOperations.getForObject(url, WikiResponse.class);
                 ContinueToken token = wikiResponse.getContinueToken();
                 if (!fireOnce && token != null) {
-                    continueToken = MessageFormat.format("&{0}={1}", token.getParameterName(), token.getContinueToken());
+                    continueToken = MessageFormat.format("&{0}={1}", token.getParameterName(), URLEncoder.encode(token.getContinueToken(), "UTF-8"));
                 } else {
                     continueToken = null;
                 }
