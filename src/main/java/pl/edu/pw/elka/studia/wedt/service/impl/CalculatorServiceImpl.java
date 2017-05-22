@@ -58,7 +58,27 @@ public class CalculatorServiceImpl implements CalculatorService {
         Set<String> distinctLinks = new LinkedHashSet<>(firstList);
         distinctLinks.addAll(secondList);
         Map<String, BigDecimal> firstVector = calculateWeights(language, wikiArticlesAmount, distinctLinks, firstList);
-        Map<String, BigDecimal> secondVector = calculateWeights(language, wikiArticlesAmount,distinctLinks, secondList);
+        Map<String, BigDecimal> secondVector = calculateWeights(language, wikiArticlesAmount, distinctLinks, secondList);
+
+        StringBuilder message = new StringBuilder();
+        for (String key : distinctLinks) {
+            message.append("Key: " + key);
+            if (firstVector.containsKey(key)) {
+                message.append(" - firstVector: " + firstVector.get(key).toPlainString());
+            }
+            else {
+                message.append(" - firstVector: null");
+            }
+            if (secondVector.containsKey(key)) {
+                message.append(", secondVector: " + secondVector.get(key).toPlainString());
+            }
+            else {
+                message.append(", secondVector: null");
+            }
+            message.append("\n");
+        }
+        LOGGER.info(message.toString());
+
         BigDecimal result = calculateAngle(firstVector, secondVector);
         stopWatch.stop();
         LOGGER.info(stopWatch.getLastTaskInfo().getTaskName() + ": running time (millis) = " +  stopWatch.getLastTaskInfo().getTimeMillis());
@@ -66,7 +86,6 @@ public class CalculatorServiceImpl implements CalculatorService {
     }
 
     private Map<String, BigDecimal> calculateWeights(final String language, final BigInteger wikiArticlesAmount, Set<String> distinctLinks, List<String> existingList) {
-        Map<String, BigDecimal> result = new HashMap<>(distinctLinks.size());
         ExecutorService executor = Executors.newFixedThreadPool(25);
         List<Future<Pair<String, BigDecimal>>> results = new ArrayList<>();
 
@@ -82,14 +101,21 @@ public class CalculatorServiceImpl implements CalculatorService {
                 results.add(executor.submit(new Callable<Pair<String, BigDecimal>>() {
                     @Override
                     public Pair<String, BigDecimal> call() throws Exception {
-                        BigDecimal wikiAmmount = new BigDecimal(wikiArticlesAmount.toString());
-                        BigDecimal refAmmount = new BigDecimal(wikiService.getReferencesToArticleAmount(language, link));
-                        BigDecimal result = new BigDecimal(Math.log(wikiAmmount.divide(refAmmount, SCALE, BigDecimal.ROUND_HALF_EVEN ).doubleValue()));
-                        return new Pair<>(link, result);
+                        try {
+                            BigDecimal wikiAmmount = new BigDecimal(wikiArticlesAmount.toString());
+                            BigDecimal refAmmount = new BigDecimal(wikiService.getReferencesToArticleAmount(language, link));
+                            BigDecimal result = new BigDecimal(Math.log(wikiAmmount.divide(refAmmount, SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
+                            return new Pair<>(link, result);
+                        } catch (Exception e){
+                            LOGGER.error("Calc: " + link, e);
+                        }
+                        return new Pair<>(link, new BigDecimal(0));
                     }
                 }));
             }
         }
+
+        Map<String, BigDecimal> result = new HashMap<>(distinctLinks.size());
         for (Future<Pair<String, BigDecimal>> future: results) {
             try {
                 Pair<String, BigDecimal> pair = future.get();
