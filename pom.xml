@@ -77,7 +77,6 @@
             <version>${log4j.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/log4j/apache-log4j-extras -->
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>apache-log4j-extras</artifactId>
@@ -90,7 +89,6 @@
             <version>${guava.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
         <dependency>
             <groupId>org.javatuples</groupId>
             <artifactId>javatuples</artifactId>
@@ -156,7 +154,7 @@
                 </configuration>
             </plugin>
 
-            <plugin><!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-maven-plugin -->
+            <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.3.3.v20150827</version>
@@ -168,7 +166,7 @@
                         </systemProperty>
                         <systemProperty>
                             <name>log4j.configuration</name>
-                            <value>file:///${basedir}/config/config/log4j.xml</value>
+                            <value>file:///${basedir}/src/main/resources/log4j.xml</value>
                         </systemProperty>
                         <systemProperty>
                             <name>jetty.port</name>
@@ -181,7 +179,6 @@
                     <webApp>
                         <contextPath>/</contextPath>
                     </webApp>
-                    <!--jettyXml>${basedir}/config/jetty-env.xml</jettyXml-->
                 </configuration>
             </plugin>
         </plugins>
