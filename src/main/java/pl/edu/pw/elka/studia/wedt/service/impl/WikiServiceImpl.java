@@ -6,6 +6,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.log4j.Logger;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.*;
@@ -37,20 +39,26 @@ import java.util.concurrent.TimeUnit;
 public class WikiServiceImpl implements WikiService {
     private static final Logger LOGGER = Logger.getLogger(WikiServiceImpl.class);
     private enum ApiTemplate {
-        API_URL_ARTICLE_LINKS("https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json&titles={1}{2}"),
-        API_URL_ARTICLE_BACKLINKS("https://{0}.wikipedia.org/w/api.php?action=query&list=backlinks&bllimit=max&blnamespace=0&format=json&bltitle={1}{2}"),
-        API_URL_AMBIGUOUS_PAGES("https://{0}.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&cmnamespace=0&cmtype=page&format=json&cmtitle=Category:All_disambiguation_pages{2}"),
-        API_URL_SEARCH("https://{0}.wikipedia.org/w/api.php?action=query&list=search&srprop=titlesnippet&srlimit=100&format=json&srsearch={1}"),
-        API_URL_STATISTICS("https://{0}.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=statistics&format=json");
+        API_URL_ARTICLE_LINKS("https://{0}.wikipedia.org/w/api.php?action=query&prop=links&pllimit=max&plnamespace=0&format=json","titles"),
+        API_URL_ARTICLE_BACKLINKS("https://{0}.wikipedia.org/w/api.php?action=query&list=backlinks&bllimit=max&blnamespace=0&format=json", "bltitle"),
+        API_URL_AMBIGUOUS_PAGES("https://{0}.wikipedia.org/w/api.php?action=query&list=categorymembers&cmlimit=max&cmprop=title&cmnamespace=0&cmtype=page&format=json&cmtitle=Category:All_disambiguation_pages", null),
+        API_URL_SEARCH("https://{0}.wikipedia.org/w/api.php?action=query&list=search&srprop=titlesnippet&srlimit=100&format=json", "srsearch"),
+        API_URL_STATISTICS("https://{0}.wikipedia.org/w/api.php?action=query&meta=siteinfo&siprop=statistics&format=json",null);
 
         private String template;
+        private String titleParamName;
 
-        ApiTemplate(String template) {
+        ApiTemplate(String template, String titleParamName) {
             this.template = template;
+            this.titleParamName = titleParamName;
         }
 
         public String getTemplate() {
             return template;
+        }
+
+        public String getTitleParamName() {
+            return titleParamName;
         }
     }
 
@@ -126,19 +134,24 @@ public class WikiServiceImpl implements WikiService {
 
     private List<String> collectAll(ApiTemplate apiTemplate, String language, String search, boolean fireOnce){
         List<String> result = new ArrayList<>();
-        String continueToken = "";
         StopWatch requestStopWatch = new StopWatch(WikiServiceImpl.class.getSimpleName());
         requestStopWatch.start(apiTemplate.name()+": "+language+", "+search);
         try {
-            while (continueToken != null) {
-                String url = MessageFormat.format(apiTemplate.getTemplate(), language, URLEncoder.encode(search, "UTF-8"), continueToken);
-                WikiResponse wikiResponse = restOperations.getForObject(url, WikiResponse.class);
-                ContinueToken token = wikiResponse.getContinueToken();
-                if (!fireOnce && token != null) {
-                    continueToken = MessageFormat.format("&{0}={1}", token.getParameterName(), token.getContinueToken());
-                } else {
-                    continueToken = null;
+            String url = MessageFormat.format(apiTemplate.getTemplate(), language);
+            ContinueToken continueToken = null;
+            do {
+                URIBuilder builder = new URIBuilder(url);
+                if(apiTemplate.getTitleParamName() != null) {
+                    builder.addParameter(apiTemplate.getTitleParamName(), search);
                 }
+                if(continueToken != null){
+                    builder.addParameter(continueToken.getParameterName(), continueToken.getContinueToken());
+                }
+                WikiResponse wikiResponse = restOperations.getForObject(builder.build(), WikiResponse.class);
+                if(wikiResponse.getQuery() == null){//wiki api slack
+                    throw new Exception(restOperations.getForObject(builder.build(), String.class));
+                }
+                continueToken = wikiResponse.getContinueToken();
                 List<ArticleTitle> articleTitleList;
                 if (wikiResponse.getQuery().getPages() != null) {
                     articleTitleList = wikiResponse.getQuery().getPages().getQueryResult().getArticleTitleList();
@@ -148,7 +161,7 @@ public class WikiServiceImpl implements WikiService {
                 for (ArticleTitle articleTitle : articleTitleList) {
                     result.add(articleTitle.getTitle());
                 }
-            }
+            }while (continueToken != null);
             Set<String> ambiguousArticlesList = getForbiddenArticleTitles(language);
             if(ambiguousArticlesList != null) {
                 result.removeAll(ambiguousArticlesList);
