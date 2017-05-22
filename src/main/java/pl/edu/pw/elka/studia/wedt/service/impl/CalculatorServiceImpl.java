@@ -29,6 +29,8 @@ public class CalculatorServiceImpl implements CalculatorService {
 
     private int SCALE = 20;
 
+    private int N_THREADS = 25;
+
     @Autowired
     private WikiService wikiService;
 
@@ -52,6 +54,8 @@ public class CalculatorServiceImpl implements CalculatorService {
 
     private BigDecimal angleMeasure(StopWatch stopWatch, String language, String firstEntry, String secondEntry) {
         stopWatch.start("AngleMeasure");
+
+
         BigInteger wikiArticlesAmount = wikiService.getTotalArticlesNumber(language);
         List<String> firstList = wikiService.getReferencesOfArticle(language, firstEntry);
         List<String> secondList = wikiService.getReferencesOfArticle(language, secondEntry);
@@ -86,7 +90,7 @@ public class CalculatorServiceImpl implements CalculatorService {
     }
 
     private Map<String, BigDecimal> calculateWeights(final String language, final BigInteger wikiArticlesAmount, Set<String> distinctLinks, List<String> existingList) {
-        ExecutorService executor = Executors.newFixedThreadPool(25);
+        ExecutorService executor = Executors.newFixedThreadPool(N_THREADS);
         List<Future<Pair<String, BigDecimal>>> results = new ArrayList<>();
 
         for (final String link: distinctLinks) {
@@ -107,9 +111,9 @@ public class CalculatorServiceImpl implements CalculatorService {
                             BigDecimal result = new BigDecimal(Math.log(wikiAmmount.divide(refAmmount, SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
                             return new Pair<>(link, result);
                         } catch (Exception e){
-                            LOGGER.error("Calc: " + link, e);
+                            LOGGER.error("Calc failed for " + link, e);
+                            return new Pair<>(link, new BigDecimal(Math.log(wikiArticlesAmount.doubleValue())));
                         }
-                        return new Pair<>(link, new BigDecimal(0));
                     }
                 }));
             }
