@@ -156,7 +156,8 @@ public class CalculatorServiceImpl implements CalculatorService {
 
         //LOGGER.info("cosAng: " + cosAng.toPlainString());
         LOGGER.info("radAngle: " + radAngle.toPlainString());
-        return radAngle.multiply(new BigDecimal(2)).divide(new BigDecimal(Math.PI), SCALE, BigDecimal.ROUND_HALF_EVEN);
+        LOGGER.info("res: " + radAngle.multiply(new BigDecimal(2 / Math.PI )));
+        return radAngle.multiply(new BigDecimal(2 / Math.PI ));
     }
 
 
