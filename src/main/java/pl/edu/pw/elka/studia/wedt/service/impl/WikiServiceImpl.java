@@ -131,11 +131,11 @@ public class WikiServiceImpl implements WikiService {
         requestStopWatch.start(apiTemplate.name()+": "+language+", "+search);
         try {
             while (continueToken != null) {
-                String url = MessageFormat.format(apiTemplate.getTemplate(), language, search, continueToken);
+                String url = MessageFormat.format(apiTemplate.getTemplate(), language, URLEncoder.encode(search, "UTF-8"), continueToken);
                 WikiResponse wikiResponse = restOperations.getForObject(url, WikiResponse.class);
                 ContinueToken token = wikiResponse.getContinueToken();
                 if (!fireOnce && token != null) {
-                    continueToken = MessageFormat.format("&{0}={1}", token.getParameterName(), URLEncoder.encode(token.getContinueToken(), "UTF-8"));
+                    continueToken = MessageFormat.format("&{0}={1}", token.getParameterName(), token.getContinueToken());
                 } else {
                     continueToken = null;
                 }
