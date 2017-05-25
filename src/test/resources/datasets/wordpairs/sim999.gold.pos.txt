@@ -1,4 +1,4 @@
-#word1:word2:SimLex999:POS1:POS2
+
 old:new:1.58:a:a
 smart:intelligent:9.2:a:a
 hard:difficult:8.77:a:a

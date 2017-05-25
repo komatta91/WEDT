@@ -1,4 +1,3 @@
-#Word1:Word2:Gold:P1:P2
 love:sex:6.77:n:n
 tiger:cat:7.35:n:n
 tiger:tiger:10:n:n

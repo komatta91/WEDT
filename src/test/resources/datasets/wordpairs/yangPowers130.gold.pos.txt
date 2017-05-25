@@ -1,4 +1,3 @@
-#Word1:Word2:Mean:POS1:POS2
 brag:boast:4.00:v:v
 concoct:devise:4.00:v:v
 divide:split:4.00:v:v

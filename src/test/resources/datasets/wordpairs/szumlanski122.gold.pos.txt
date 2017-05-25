@@ -1,4 +1,3 @@
-#WORD1:WORD2:MEAN:POS1:POS2
 underwear:lingerie:3.94118:n:n
 digital camera:photographer:3.85294:n:n
 tuition:fee:3.84706:n:n
