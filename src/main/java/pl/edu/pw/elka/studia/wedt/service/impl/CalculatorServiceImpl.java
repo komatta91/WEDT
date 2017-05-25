@@ -113,7 +113,7 @@ public class CalculatorServiceImpl implements CalculatorService {
                     @Override
                     public Pair<String, BigDecimal> call() throws Exception {
                         try {
-                            BigDecimal wikiAmmount = new BigDecimal(wikiArticlesAmount.toString());
+                            BigDecimal wikiAmmount = new BigDecimal(wikiArticlesAmount);
                             BigDecimal refAmmount = new BigDecimal(wikiService.getReferencesToArticleAmount(language, link));
                             BigDecimal result = new BigDecimal(Math.log(wikiAmmount.divide(refAmmount, SCALE, BigDecimal.ROUND_HALF_EVEN).doubleValue()));
                             return new Pair<>(link, result);
