@@ -21,6 +21,7 @@ new File('results.txt').withWriter { out ->
             def resLine = nextLine[0..2] + res.googleDistance + res.angle + res.finalScore
             println(resLine)
             out.println(resLine.join(':'))
+            out.flush()
         }
     }
 }
