@@ -21,11 +21,18 @@ new File('results.txt').withWriter { out ->
         while ((nextLine = reader.readNext()) != null) {
             nextLine[2] = new BigDecimal(10).subtract(new BigDecimal(nextLine[2])).divide(10, 20, BigDecimal.ROUND_HALF_EVEN).toString()
             println('Starting calculation for ' + nextLine[0..2])
-            def res = calculatorService.calculate("en", nextLine[0], nextLine[1])
-            def resLine = nextLine[0..2] + res.googleDistance + res.angle + res.finalScore
-            println(resLine)
-            out.println(resLine.join(':'))
-            out.flush()
+            try{
+                def res = calculatorService.calculate("en", nextLine[0], nextLine[1])
+                def resLine = nextLine[0..2] + res.googleDistance + res.angle + res.finalScore
+                println(resLine)
+                out.println(resLine.join(':'))
+                out.flush()
+            }catch(Exception e){
+                def resLine = nextLine[0..2] + '#' + '#' + '#' + e.getMessage()
+                println(resLine)
+                out.println(resLine.join(':'))
+                out.flush()
+            }
         }
     }
     out.println('## END ##')
