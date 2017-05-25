@@ -12,9 +12,12 @@ ctx.refresh()
 def calculatorService = ctx.getBean(CalculatorService.class)
 
 new File('results.txt').withWriter { out ->
+    out.println('## START ##')
     new File("resources/datasets/wordpairs").eachFileRecurse(FileType.FILES) { file ->
         CSVReader reader = new CSVReader(new FileReader(file), ':' as char)
         String[] nextLine
+        out.println('## File: ' + file)
+        out.flush()
         while ((nextLine = reader.readNext()) != null) {
             println('Starting calculation for ' + nextLine[0..2])
             def res = calculatorService.calculate("en", nextLine[0], nextLine[1])
@@ -24,5 +27,6 @@ new File('results.txt').withWriter { out ->
             out.flush()
         }
     }
+    out.println('## END ##')
 }
 
