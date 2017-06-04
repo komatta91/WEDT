@@ -4,13 +4,8 @@ import org.apache.log4j.Logger;
 import org.apache.mahout.math.*;
 import org.apache.mahout.math.Vector;
 import org.javatuples.Pair;
-import org.javatuples.Tuple;
-import org.la4j.LinearAlgebra;
-import org.la4j.operation.VectorOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 import pl.edu.pw.elka.studia.wedt.controller.response.CalculateResponse;
@@ -67,26 +62,7 @@ public class CalculatorServiceImpl implements CalculatorService {
 
         Map<String, BigDecimal> firstVector = calculateWeights(language, wikiArticlesAmount, distinctLinks, firstList);
         Map<String, BigDecimal> secondVector = calculateWeights(language, wikiArticlesAmount, distinctLinks, secondList);
-/*
-        StringBuilder message = new StringBuilder();
-        for (String key : distinctLinks) {
-            message.append("Key: " + key);
-            if (firstVector.containsKey(key)) {
-                message.append(" - firstVector: " + firstVector.get(key).toPlainString());
-            }
-            else {
-                message.append(" - firstVector: null");
-            }
-            if (secondVector.containsKey(key)) {
-                message.append(", secondVector: " + secondVector.get(key).toPlainString());
-            }
-            else {
-                message.append(", secondVector: null");
-            }
-            message.append("\n");
-        }
-        LOGGER.info(message.toString());
-*/
+
         BigDecimal result = calculateAngle(firstVector, secondVector);
         firstList.retainAll(secondList);
         LOGGER.info("Common links number: " + firstList.size());
@@ -151,12 +127,6 @@ public class CalculatorServiceImpl implements CalculatorService {
             i++;
         }
         BigDecimal radAngle = new BigDecimal(Math.acos(v1.dot(v2) / (v1.getLengthSquared() * v2.getLengthSquared())));
-
-        //BigDecimal cosAng = new BigDecimal(v1.dot(v2) / (v1.getLengthSquared() * v2.getLengthSquared()));
-
-        //LOGGER.info("cosAng: " + cosAng.toPlainString());
-        LOGGER.info("radAngle: " + radAngle.toPlainString());
-        LOGGER.info("res: " + radAngle.multiply(new BigDecimal(2 / Math.PI )));
         return radAngle.multiply(new BigDecimal(2 / Math.PI ));
     }
 
@@ -164,14 +134,17 @@ public class CalculatorServiceImpl implements CalculatorService {
     @Override
     public CalculateResponse calculate(String language, String firstEntry, String secondEntry) {
         StopWatch stopWatch = new StopWatch(this.getClass().getSimpleName());
-        BigDecimal googleDistance = googleNormalizedDistance(stopWatch, language, firstEntry, secondEntry);
-        BigDecimal angle = angleMeasure(stopWatch, language,firstEntry,secondEntry);
         CalculateResponse response = new CalculateResponse();
+        BigDecimal googleDistance = googleNormalizedDistance(stopWatch, language, firstEntry, secondEntry);
+        response.setGoogleTime(Long.toString(stopWatch.getLastTaskTimeMillis()));
+        BigDecimal angle = angleMeasure(stopWatch, language,firstEntry,secondEntry);
+        response.setGoogleTime(Long.toString(stopWatch.getLastTaskTimeMillis()));
         response.setGoogleDistance(googleDistance.toPlainString());
         response.setAngle(angle.toPlainString());
         response.setFinalScore(googleDistance.add(angle).divide(new BigDecimal(2), SCALE, BigDecimal.ROUND_HALF_EVEN).toPlainString());
         LOGGER.info(response.toString());
         LOGGER.info(stopWatch.prettyPrint());
+        response.setGoogleTime(Long.toString(stopWatch.getTotalTimeMillis()));
         return response;
     }
 }
