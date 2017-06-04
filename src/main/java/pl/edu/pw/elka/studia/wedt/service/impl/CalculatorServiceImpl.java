@@ -136,15 +136,15 @@ public class CalculatorServiceImpl implements CalculatorService {
         StopWatch stopWatch = new StopWatch(this.getClass().getSimpleName());
         CalculateResponse response = new CalculateResponse();
         BigDecimal googleDistance = googleNormalizedDistance(stopWatch, language, firstEntry, secondEntry);
-        response.setGoogleTime(Long.toString(stopWatch.getLastTaskTimeMillis()));
+        response.setGoogleTime(Long.toString(stopWatch.getLastTaskInfo().getTimeMillis()));
         BigDecimal angle = angleMeasure(stopWatch, language,firstEntry,secondEntry);
-        response.setGoogleTime(Long.toString(stopWatch.getLastTaskTimeMillis()));
+        response.setAngleTime(Long.toString(stopWatch.getLastTaskInfo().getTimeMillis()));
         response.setGoogleDistance(googleDistance.toPlainString());
         response.setAngle(angle.toPlainString());
         response.setFinalScore(googleDistance.add(angle).divide(new BigDecimal(2), SCALE, BigDecimal.ROUND_HALF_EVEN).toPlainString());
         LOGGER.info(response.toString());
         LOGGER.info(stopWatch.prettyPrint());
-        response.setGoogleTime(Long.toString(stopWatch.getTotalTimeMillis()));
+        response.setTotalTime(Long.toString(stopWatch.getLastTaskInfo().getTimeMillis()));
         return response;
     }
 }
