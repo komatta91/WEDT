@@ -144,7 +144,7 @@ public class CalculatorServiceImpl implements CalculatorService {
         response.setFinalScore(googleDistance.add(angle).divide(new BigDecimal(2), SCALE, BigDecimal.ROUND_HALF_EVEN).toPlainString());
         LOGGER.info(response.toString());
         LOGGER.info(stopWatch.prettyPrint());
-        response.setTotalTime(Long.toString(stopWatch.getLastTaskInfo().getTimeMillis()));
+        response.setTotalTime(Long.toString(stopWatch.getTotalTimeMillis()));
         return response;
     }
 }
