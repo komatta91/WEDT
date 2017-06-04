@@ -126,7 +126,10 @@ public class CalculatorServiceImpl implements CalculatorService {
             v2.set(i, secondVector.get(vec).doubleValue());
             i++;
         }
-        BigDecimal radAngle = new BigDecimal(Math.acos(v1.dot(v2) / (v1.getLengthSquared() * v2.getLengthSquared())));
+
+        //LOGGER.error("To acos: " + v1.dot(v2) / (Math.sqrt(v1.getLengthSquared()) * Math.sqrt(v2.getLengthSquared())));
+        //LOGGER.error("Acos: " + Math.acos(v1.dot(v2) / (Math.sqrt(v1.getLengthSquared()) * Math.sqrt(v2.getLengthSquared()))));
+        BigDecimal radAngle = new BigDecimal(Math.acos(v1.dot(v2) / (Math.sqrt(v1.getLengthSquared()) * Math.sqrt(v2.getLengthSquared()))));
         return radAngle.multiply(new BigDecimal(2 / Math.PI ));
     }
 
