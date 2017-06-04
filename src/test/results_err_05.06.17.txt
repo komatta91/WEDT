@@ -1,0 +1,10 @@
+## START ##
+## File: resources\datasets\wordpairs\finkelstein353.gold.pos.txt
+Tiger:Tiger:0E-20:Infinite or NaN
+Car:Car:0.10600000000000000000:Infinite or NaN
+## File: resources\datasets\wordpairs\millerCharles30.gold.pos.txt
+## File: resources\datasets\wordpairs\mwe.gold.pos.txt
+## File: resources\datasets\wordpairs\rubensteinGoodenough65.gold.pos.txt
+## File: resources\datasets\wordpairs\szumlanski122.gold.pos.txt
+## File: resources\datasets\wordpairs\yangPowers130.gold.pos.txt
+## END ##
