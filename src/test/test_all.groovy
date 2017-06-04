@@ -29,26 +29,28 @@ new File('results.txt').withWriter { outFine ->
             outFine.flush()
             outErrored.flush()
             while ((nextLine = reader.readNext()) != null) {
-                nextLine[2] = new BigDecimal(10).subtract(new BigDecimal(nextLine[2])).divide(10, 20, BigDecimal.ROUND_HALF_EVEN).toString()
-                println('Starting calculation for ' + nextLine[0..2])
-                if(forbidden.contains(nextLine[0]) || forbidden.contains(nextLine[1])){
-                    def resLine = nextLine[0..2] + "FORBIDDEN"
+                def humanScore = new BigDecimal(10).subtract(new BigDecimal(nextLine[2])).divide(10, 20, BigDecimal.ROUND_HALF_EVEN).toString()
+
+                def term1 = wikiService.getEntries("en", nextLine[0])
+                term1.removeAll(forbidden)
+                term1 = term1.get(0)
+
+                def term2 = wikiService.getEntries("en", nextLine[1])
+                term2.removeAll(forbidden)
+                term2 = term2.get(0)
+
+                println('Starting calculation for ' + [term1, term2].join(" : "))
+                try{
+                    def res = calculatorService.calculate("en", term1, term2)
+                    def resLine = [term1, term2, humanScore, res.googleDistance, res.googleTime, res.angle, res.angleTime, res.finalScore, res.totalTime]
+                    println(resLine)
+                    outFine.println(resLine.join(':'))
+                    outFine.flush()
+                }catch(Exception e){
+                    def resLine = [term1, term2, humanScore] + e.getMessage()
                     println(resLine)
                     outErrored.println(resLine.join(':'))
                     outErrored.flush()
-                } else {
-                    try{
-                        def res = calculatorService.calculate("en", nextLine[0], nextLine[1])
-                        def resLine = nextLine[0..2] + res.googleDistance + res.googleTime + res.angle + res.angleTime + res.finalScore + res.totalTime
-                        println(resLine)
-                        outFine.println(resLine.join(':'))
-                        outFine.flush()
-                    }catch(Exception e){
-                        def resLine = nextLine[0..2] + e.getMessage()
-                        println(resLine)
-                        outErrored.println(resLine.join(':'))
-                        outErrored.flush()
-                    }
                 }
             }
         }
